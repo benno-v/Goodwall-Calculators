@@ -1,0 +1,1841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Goodwall Programs - Calculators</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<style>
+:root {
+  --gw-green: #15C970;
+  --gw-green-dark: #0D2E24;
+  --gw-green-light: rgba(21, 201, 112, 0.10);
+  --gw-orange: #FF8626;
+  --gw-orange-light: rgba(255, 134, 38, 0.10);
+  --gw-yellow: #F4DD2A;
+  --gw-yellow-light: rgba(244, 221, 42, 0.10);
+  --gw-blue: #5796F4;
+  --gw-blue-light: rgba(87, 150, 244, 0.10);
+  --gw-bg-dark: #0B0A11;
+  --gw-bg-dark-shade: #1A191F;
+  --gw-bg-light: #FFFFFF;
+  --gw-bg-shade: #F5F5F4;
+  --gw-bg-shade-2: #E0E0E1;
+  --gw-text: #1A191F;
+  --gw-text-secondary: #3B3841;
+  --gw-text-muted: #6B7280;
+  --gw-border: #E0E0E1;
+  --gw-radius-sm: 8px;
+  --gw-radius-md: 12px;
+  --gw-radius-lg: 16px;
+  --gw-shadow: 0 1px 3px rgba(11, 10, 17, 0.06);
+  --gw-shadow-hover: 0 4px 12px rgba(11, 10, 17, 0.1);
+  --gw-font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--gw-font);
+  background: var(--gw-bg-shade);
+  color: var(--gw-text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.header {
+  background: var(--gw-bg-dark);
+  color: #fff;
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.header-logo-svg {
+  height: 22px;
+  width: auto;
+}
+.header-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255,255,255,0.25);
+}
+.header-title {
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: rgba(255,255,255,0.7);
+}
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+.btn {
+  font-family: var(--gw-font);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: var(--gw-radius-sm);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+.btn-primary {
+  background: var(--gw-green);
+  color: #fff;
+}
+.btn-primary:hover { background: #12b563; }
+.btn-secondary {
+  background: transparent;
+  color: var(--gw-green);
+  border: 1.5px solid var(--gw-green);
+}
+.btn-secondary:hover { background: var(--gw-green-light); }
+.btn-ghost {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.18); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--gw-radius-sm);
+  background: transparent;
+  border: 1px solid var(--gw-border);
+  cursor: pointer;
+  color: var(--gw-text-muted);
+  transition: all 0.15s ease;
+}
+.btn-icon:hover { background: var(--gw-bg-shade); color: var(--gw-text); }
+
+.phase-nav {
+  background: #fff;
+  border-bottom: 1px solid var(--gw-border);
+  padding: 0 32px;
+  display: flex;
+  gap: 0;
+  position: sticky;
+  top: 52px;
+  z-index: 99;
+}
+.phase-tab {
+  padding: 14px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gw-text-muted);
+  cursor: pointer;
+  border-bottom: 2.5px solid transparent;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+.phase-tab:hover { color: var(--gw-text); }
+.phase-tab.active {
+  color: var(--gw-green);
+  font-weight: 700;
+  border-bottom-color: var(--gw-green);
+}
+
+.main { padding: 24px 32px 60px; max-width: 1400px; margin: 0 auto; }
+.phase-content { display: none; }
+.phase-content.active { display: block; }
+.phase-description {
+  font-size: 14px;
+  color: var(--gw-text-secondary);
+  margin-bottom: 20px;
+  max-width: 700px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--gw-border);
+  border-radius: var(--gw-radius-md);
+  padding: 20px 24px;
+  box-shadow: var(--gw-shadow);
+  margin-bottom: 20px;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gw-text-secondary);
+}
+.card-subtitle {
+  font-size: 12px;
+  color: var(--gw-text-muted);
+  font-weight: 400;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.summary-card {
+  background: #fff;
+  border: 1px solid var(--gw-border);
+  border-radius: var(--gw-radius-md);
+  padding: 18px 20px;
+  text-align: center;
+  box-shadow: var(--gw-shadow);
+  position: relative;
+  overflow: hidden;
+}
+.summary-card.highlight {
+  border-color: var(--gw-green);
+  box-shadow: 0 0 0 1px var(--gw-green), var(--gw-shadow);
+}
+.summary-card-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+.summary-card-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--gw-text-muted);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.summary-card-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--gw-text);
+  line-height: 1.1;
+}
+.summary-card-sub {
+  font-size: 12px;
+  color: var(--gw-text-muted);
+  margin-top: 4px;
+}
+
+.toggle-group {
+  display: inline-flex;
+  background: var(--gw-bg-shade);
+  border-radius: var(--gw-radius-sm);
+  padding: 3px;
+  gap: 2px;
+  margin-bottom: 16px;
+}
+.toggle-option {
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gw-text-muted);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+.toggle-option.active {
+  background: #fff;
+  color: var(--gw-text);
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.input-group { margin-bottom: 14px; }
+.input-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gw-text-secondary);
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.input-field {
+  font-family: var(--gw-font);
+  font-size: 14px;
+  padding: 10px 14px;
+  border: 1px solid var(--gw-border);
+  border-radius: var(--gw-radius-sm);
+  width: 100%;
+  color: var(--gw-text);
+  background: #fff;
+  transition: border-color 0.15s ease;
+}
+.input-field:focus {
+  outline: none;
+  border-color: var(--gw-green);
+  box-shadow: 0 0 0 3px var(--gw-green-light);
+}
+.input-field-lg {
+  font-size: 1.4rem;
+  font-weight: 700;
+  padding: 14px 18px;
+}
+.input-prefix { position: relative; }
+.input-prefix .prefix {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--gw-text-muted);
+}
+.input-prefix .input-field-lg { padding-left: 32px; }
+select.input-field {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border-radius: var(--gw-radius-sm);
+  border: 1px solid var(--gw-border);
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.data-table thead {
+  background: var(--gw-green-dark);
+  color: #fff;
+}
+.data-table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--gw-border);
+  white-space: nowrap;
+}
+.data-table tbody tr:nth-child(even) { background: var(--gw-bg-shade); }
+.data-table tbody tr:hover { background: var(--gw-green-light); }
+.data-table .input-inline {
+  font-family: var(--gw-font);
+  font-size: 13px;
+  padding: 4px 8px;
+  border: 1px solid var(--gw-border);
+  border-radius: 4px;
+  width: 80px;
+  text-align: right;
+  background: #fff;
+}
+.data-table .input-inline:focus {
+  outline: none;
+  border-color: var(--gw-green);
+  box-shadow: 0 0 0 2px var(--gw-green-light);
+}
+.data-table .total-row {
+  font-weight: 700;
+  background: var(--gw-bg-shade) !important;
+  border-top: 2px solid var(--gw-border);
+}
+
+.funnel-container { margin: 20px 0; }
+.funnel-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.funnel-label {
+  width: 130px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gw-text-secondary);
+  text-align: right;
+  padding-right: 14px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+.funnel-bar-wrap {
+  flex: 1;
+  height: 36px;
+  background: var(--gw-bg-shade);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.funnel-bar {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.4s ease;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  min-width: 60px;
+}
+.funnel-bar-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+.funnel-count {
+  width: 120px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+  padding-left: 12px;
+  flex-shrink: 0;
+}
+.funnel-rate {
+  width: 60px;
+  font-size: 11px;
+  color: var(--gw-text-muted);
+  padding-left: 8px;
+  flex-shrink: 0;
+}
+
+.tooltip-trigger {
+  display: inline-flex;
+  align-items: center;
+  cursor: help;
+  color: var(--gw-text-muted);
+  font-size: 14px;
+}
+.tooltip-trigger .tooltip-text {
+  display: none;
+}
+.gw-tooltip-float {
+  position: fixed;
+  z-index: 9999;
+  background: var(--gw-bg-dark);
+  color: #fff;
+  font-family: var(--gw-font);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  padding: 10px 14px;
+  border-radius: var(--gw-radius-sm);
+  width: 280px;
+  white-space: normal;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.gw-tooltip-float.visible {
+  opacity: 1;
+}
+.gw-tooltip-float::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+}
+.gw-tooltip-float.above::after {
+  top: 100%;
+  border-top-color: var(--gw-bg-dark);
+}
+.gw-tooltip-float.below::after {
+  bottom: 100%;
+  border-bottom-color: var(--gw-bg-dark);
+}
+
+.alloc-bar {
+  height: 8px;
+  background: var(--gw-bg-shade-2);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  margin: 8px 0 16px;
+}
+.alloc-segment {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+.alloc-warning {
+  font-size: 12px;
+  color: #EF4444;
+  font-weight: 600;
+  margin-top: -12px;
+  margin-bottom: 12px;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 999px;
+  background: var(--gw-bg-shade);
+  color: var(--gw-text-secondary);
+  border: 1px solid var(--gw-border);
+  margin: 2px;
+}
+.chip-green { background: var(--gw-green-light); color: var(--gw-green-dark); border-color: var(--gw-green); }
+.chip-remove {
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0.6;
+}
+.chip-remove:hover { opacity: 1; }
+
+.multi-select { position: relative; display: inline-block; }
+.multi-select-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #fff;
+  border: 1px solid var(--gw-border);
+  border-radius: var(--gw-radius-sm);
+  box-shadow: var(--gw-shadow-hover);
+  z-index: 150;
+  max-height: 200px;
+  overflow-y: auto;
+  min-width: 180px;
+}
+.multi-select-dropdown.open { display: block; }
+.multi-select-option {
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.multi-select-option:hover { background: var(--gw-bg-shade); }
+
+.mb-12 { margin-bottom: 12px; }
+.mb-20 { margin-bottom: 20px; }
+.mt-16 { margin-top: 16px; }
+.text-muted { color: var(--gw-text-muted); }
+
+.next-step {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--gw-border);
+}
+
+@media (max-width: 900px) {
+  .header { padding: 12px 16px; }
+  .phase-nav { padding: 0 16px; }
+  .main { padding: 16px; }
+  .two-col { grid-template-columns: 1fr; }
+  .summary-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+  .funnel-label { width: 90px; font-size: 11px; }
+  .funnel-count { width: 90px; }
+}
+
+@media print {
+  .header, .phase-nav, .btn, .next-step { display: none !important; }
+  .phase-content { display: block !important; }
+  .card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <svg class="header-logo-svg" width="120" height="26" viewBox="0 0 3000 657" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_297_7076)"><g clip-path="url(#clip1_297_7076)"><path fill-rule="evenodd" clip-rule="evenodd" d="M596.796 519.744L471.338 270.81L316.876 354.364L362.068 443.989L421.509 412.118L462.443 493.649L151.454 493.987L307.096 185.148L359.623 289.359L454.771 237.885L356.588 43.122C334.582 -1.01591 275.732 -1.2267 253.515 42.8269L13.4756 519.112C-6.75951 559.245 22.1177 606.84 66.6772 606.84H543.215C587.479 606.84 616.357 559.877 596.754 519.786L596.796 519.744Z" fill="white"/></g><path d="M835.112 150.989V467.438C835.112 496.13 849.47 510.475 866.362 510.475C885.788 510.475 904.369 492.754 904.369 454.78V359.424H866.362V282.632H1022.61V604.145H940.687V546.817L944.076 526.747H938.709L933.676 544.344L932.754 546.942L932.764 546.941C918.939 590.166 878.702 613.427 836.801 613.427C779.369 613.427 716.868 567.015 716.868 458.156V159.427C716.868 54.7881 775.99 5 868.052 5C960.957 5 1022.61 57.3196 1022.61 159.427V253.94H904.369V150.989C904.369 118.078 887.477 107.952 869.741 107.952C852.004 107.952 835.112 118.078 835.112 150.989Z" fill="white"/><path d="M2693.94 604.987V13.1143H2806.27V604.987H2693.94Z" fill="white"/><path d="M2834.98 604.987V13.1143H2947.31V604.987H2834.98Z" fill="white"/><path d="M2078.56 130.384H1966.23L2027.04 604.992H2146.97L2169.78 361.714H2178.22L2200.18 604.992H2320.11L2380.93 130.384H2268.59L2250.86 406.439H2243.26L2212.85 130.384H2135.15L2104.74 406.439H2096.3L2078.56 130.384Z" fill="white"/><path fill-rule="evenodd" clip-rule="evenodd" d="M1356.07 264.617C1356.07 181.074 1405.05 122.004 1496.27 122.004C1587.48 122.004 1639.01 181.918 1639.01 264.617L1639.01 470.814C1639.01 553.512 1587.48 613.427 1496.27 613.427C1405.05 613.427 1356.07 554.356 1356.07 470.814V264.617ZM1468.4 258.71V477.565C1468.4 502.037 1480.22 517.226 1497.96 517.226C1515.69 517.226 1527.52 502.037 1527.52 477.565V258.71C1527.52 232.55 1515.69 218.205 1497.96 218.205C1480.22 218.205 1468.4 232.55 1468.4 258.71Z" fill="white"/><path fill-rule="evenodd" clip-rule="evenodd" d="M1188.62 122.004C1097.4 122.004 1048.41 181.074 1048.41 264.617L1048.41 470.813C1048.41 554.356 1097.4 613.427 1188.62 613.427C1279.83 613.427 1331.35 553.512 1331.35 470.813L1331.35 264.617C1331.35 181.918 1279.83 122.004 1188.62 122.004ZM1160.74 477.564L1160.74 258.71C1160.74 232.55 1172.57 218.205 1190.31 218.205C1208.04 218.205 1219.87 232.55 1219.87 258.71L1219.87 477.564C1219.87 502.036 1208.04 517.226 1190.31 517.226C1172.57 517.226 1160.74 502.036 1160.74 477.564Z" fill="white"/><path fill-rule="evenodd" clip-rule="evenodd" d="M1945.81 604.987H1833.48V559.193L1836.78 539.191H1831.42L1826.38 556.788L1825.49 559.385C1808.56 594.313 1780.89 613.426 1751.56 613.426C1705.1 613.426 1663.72 567.013 1663.72 482.627V230.019C1663.72 157.446 1703.41 122.004 1748.18 122.004C1781.64 122.004 1811.79 141.046 1825.49 174.21L1826.38 176.807L1831.42 194.404H1836.78L1833.48 174.402V13.1143H1945.81V604.987ZM1833.48 488.534V244.364C1828.41 230.019 1816.59 219.892 1803.92 219.892C1787.03 219.892 1776.05 234.238 1776.05 255.335V478.407C1776.05 498.66 1787.03 513.85 1803.08 513.85C1816.59 513.85 1828.41 503.723 1833.48 488.534Z" fill="white"/><path fill-rule="evenodd" clip-rule="evenodd" d="M2555.21 258.201C2555.21 233.729 2544.23 218.54 2527.34 218.54C2510.45 218.54 2498.63 233.729 2498.63 258.201V309.677H2386.29V264.952C2386.29 177.19 2439.5 122.339 2525.65 122.339C2610.96 122.339 2666.7 177.699 2666.7 264.617V604.989H2555.21V568.902L2558.4 549.581H2553.03C2553.03 549.581 2550.18 564.085 2549.23 565.906C2548.28 567.727 2546.47 570.523 2546.47 570.523C2525.29 599.126 2498.61 613.428 2469.06 613.428C2419.23 613.428 2384.6 575.454 2384.6 519.759V423.817C2384.6 368.121 2426.83 330.991 2490.18 330.991H2555.21V258.201ZM2554.79 501.273V386.766H2535.37C2509.18 386.766 2496.51 396.892 2496.51 417.989V496.21C2496.51 514.775 2506.65 526.589 2522.7 526.589C2537.05 526.589 2548.88 517.307 2554.79 501.273Z" fill="white"/></g><defs><clipPath id="clip0_297_7076"><rect width="3000" height="657" fill="white"/></clipPath><clipPath id="clip1_297_7076"><rect width="596.136" height="596.895" fill="white" transform="translate(6.89966 9.90237)"/></clipPath></defs></svg>
+    <span class="header-divider"></span>
+    <span class="header-title">Calculators</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-ghost btn-sm" onclick="exportCSV()"><i class="ph ph-download-simple"></i> Export CSV</button>
+    <button class="btn btn-ghost btn-sm" onclick="resetState()"><i class="ph ph-arrow-counter-clockwise"></i> Reset</button>
+  </div>
+</div>
+
+<div class="phase-nav">
+  <div class="phase-tab active" data-phase="kpiPlanning" onclick="switchPhase('kpiPlanning')">KPI Planning</div>
+  <div class="phase-tab" data-phase="channelStrategy" onclick="switchPhase('channelStrategy')">Channel Strategy</div>
+  <div class="phase-tab" data-phase="partnerPool" onclick="switchPhase('partnerPool')">Partner Marketing Pool</div>
+</div>
+
+<div class="main">
+
+  <!-- KPI PLANNING -->
+  <div id="phase-kpiPlanning" class="phase-content active">
+    <p class="phase-description">Calculate the ideal KPIs for a program. Start from a budget to see achievable outcomes, or set a KPI target to determine the required budget.</p>
+
+    <div class="toggle-group">
+      <div class="toggle-option active" data-mode="budgetToKpi" onclick="setMode('budgetToKpi')">Budget &rarr; KPIs</div>
+      <div class="toggle-option" data-mode="kpiToBudget" onclick="setMode('kpiToBudget')">KPI Target &rarr; Budget</div>
+    </div>
+
+    <div id="budget-input-section" class="card">
+      <div class="two-col">
+        <div>
+          <div class="input-group">
+            <label class="input-label">Total Marketing Budget ($)</label>
+            <div class="input-prefix">
+              <span class="prefix">$</span>
+              <input type="text" id="totalBudget" class="input-field input-field-lg" value="150,000" oninput="onBudgetInput(this)">
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="input-group">
+            <label class="input-label">Primary KPI Objective</label>
+            <select id="primaryKpi" class="input-field" onchange="onPrimaryKpiChange(this)">
+              <option value="reach">Reach</option>
+              <option value="accelerated" selected>Accelerated</option>
+              <option value="engaged">Engaged</option>
+              <option value="trained">Trained</option>
+              <option value="credentialed">Credentialed</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label class="input-label">Organic Boost Multiplier</label>
+            <input type="text" id="organicBoost" class="input-field" value="1.48" oninput="onOrganicBoostInput(this)">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="kpi-target-section" class="card" style="display:none;">
+      <div class="two-col">
+        <div>
+          <div class="input-group">
+            <label class="input-label">Target KPI Stage</label>
+            <select id="targetStage" class="input-field" onchange="onTargetStageChange(this)">
+              <option value="reach">Reach</option>
+              <option value="accelerated">Accelerated</option>
+              <option value="engaged">Engaged</option>
+              <option value="trained">Trained</option>
+              <option value="credentialed" selected>Credentialed</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label class="input-label">Target Value</label>
+            <input type="text" id="targetValue" class="input-field input-field-lg" value="313,528" oninput="onTargetValueInput(this)">
+          </div>
+        </div>
+        <div>
+          <div class="input-group">
+            <label class="input-label">Organic Boost Multiplier</label>
+            <input type="text" id="organicBoostTarget" class="input-field" value="1.48" oninput="onOrganicBoostInput(this)">
+          </div>
+          <div class="input-group">
+            <label class="input-label">Primary KPI Objective</label>
+            <select id="primaryKpiTarget" class="input-field" onchange="onPrimaryKpiChange(this)">
+              <option value="reach">Reach</option>
+              <option value="accelerated">Accelerated</option>
+              <option value="engaged">Engaged</option>
+              <option value="trained">Trained</option>
+              <option value="credentialed" selected>Credentialed</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="kpi-summary-top" class="summary-grid"></div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Geographic Targeting</div>
+          <div class="card-subtitle">Budget allocation by geography. All benchmarks are editable.</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addGeography()"><i class="ph ph-plus"></i> Add Geography</button>
+      </div>
+      <div id="alloc-bar" class="alloc-bar"></div>
+      <div id="alloc-warning"></div>
+      <div class="table-wrap">
+        <table class="data-table" id="geo-table">
+          <thead>
+            <tr>
+              <th>Geography</th>
+              <th>% Alloc.</th>
+              <th>Budget ($)</th>
+              <th>CPI ($)</th>
+              <th>Reach Mult.</th>
+              <th>Reach</th>
+              <th>Accelerated</th>
+              <th>Engaged</th>
+              <th>Trained</th>
+              <th>Credentialed</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="geo-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Conversion Benchmarks</div>
+          <div class="card-subtitle">Funnel conversion rates. Edit to adjust projections.</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="benchmark-table">
+          <thead>
+            <tr>
+              <th>Conversion Step</th>
+              <th>Rate (%)</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody id="benchmark-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Projected KPI Funnel</div>
+          <div class="card-subtitle">Funnel overview based on current inputs</div>
+        </div>
+      </div>
+      <div id="funnel-viz" class="funnel-container"></div>
+      <div class="table-wrap mt-16">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Stage</th>
+              <th>Count</th>
+              <th>Conv. Rate</th>
+              <th>Cost / User</th>
+            </tr>
+          </thead>
+          <tbody id="funnel-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card-title mb-12">KPI Summary Cards</div>
+    <div id="kpi-summary-cards" class="summary-grid mb-20"></div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Geographic Breakdown</div>
+          <div class="card-subtitle">Projected outcomes by geography</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Geography</th>
+              <th>Budget</th>
+              <th>Reach</th>
+              <th>Accelerated</th>
+              <th>Engaged</th>
+              <th>Trained</th>
+              <th>Credentialed</th>
+            </tr>
+          </thead>
+          <tbody id="geo-breakdown-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="next-step">
+      <button class="btn btn-primary" onclick="switchPhase('channelStrategy')">Continue to Channel Strategy <i class="ph ph-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- CHANNEL STRATEGY -->
+  <div id="phase-channelStrategy" class="phase-content">
+    <p class="phase-description">Refine the marketing approach by defining channels and ad types. Allocate budget across channels and see projected contributions to the KPI funnel.</p>
+
+    <div id="channel-summary" class="summary-grid mb-20"></div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Marketing Channels</div>
+          <div class="card-subtitle">Add, edit, or remove channels. Platform and ad type fields are fully editable.</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addChannel()"><i class="ph ph-plus"></i> Add Channel</button>
+      </div>
+      <div id="channel-alloc-bar" class="alloc-bar"></div>
+      <div id="channel-alloc-warning"></div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Channel Name</th>
+              <th>Platform</th>
+              <th>Ad Type</th>
+              <th>Budget %</th>
+              <th>Budget ($)</th>
+              <th>CPI ($)</th>
+              <th>Target Stage</th>
+              <th>Est. Users</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="channel-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Channel Contribution to Funnel</div>
+          <div class="card-subtitle">How each channel feeds into the overall KPI funnel</div>
+        </div>
+      </div>
+      <div id="channel-funnel-viz" class="funnel-container"></div>
+    </div>
+
+    <div class="next-step">
+      <button class="btn btn-secondary" onclick="switchPhase('kpiPlanning')"><i class="ph ph-arrow-left"></i> Back to KPI Planning</button>
+      <div style="width:12px"></div>
+      <button class="btn btn-primary" onclick="switchPhase('partnerPool')">Continue to Partner Marketing Pool <i class="ph ph-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- PARTNER POOL -->
+  <div id="phase-partnerPool" class="phase-content">
+    <p class="phase-description">Pool marketing budgets across multiple partners. Allocate each partner's budget by geography and KPI priority, then view the combined marketing pool.</p>
+
+    <div id="pool-summary" class="summary-grid mb-20"></div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Partners</div>
+          <div class="card-subtitle">Add partners, their budgets, geographic focus, and KPI priorities.</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addPartner()"><i class="ph ph-plus"></i> Add Partner</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Partner</th>
+              <th>Budget ($)</th>
+              <th>Geographic Focus</th>
+              <th>KPI Priority</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="partner-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Budget Pool by Geography</div>
+          <div class="card-subtitle">Total pooled budget per geography across all partners</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Geography</th>
+              <th>Total Budget</th>
+              <th># Partners</th>
+              <th>% of Pool</th>
+              <th>Est. Accelerated</th>
+              <th>Est. Trained</th>
+              <th>Est. Credentialed</th>
+            </tr>
+          </thead>
+          <tbody id="pool-geo-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Combined KPI Projections</div>
+          <div class="card-subtitle">Projected outcomes from the pooled marketing budget</div>
+        </div>
+      </div>
+      <div id="pool-funnel-viz" class="funnel-container"></div>
+      <div id="pool-kpi-cards" class="summary-grid mt-16"></div>
+    </div>
+
+    <div class="next-step">
+      <button class="btn btn-secondary" onclick="switchPhase('channelStrategy')"><i class="ph ph-arrow-left"></i> Back to Channel Strategy</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Stage definitions
+var STAGES = [
+  { key: 'reach', label: 'Reach', color: '#15C970', definition: 'Total number of unique young people exposed to program content, messaging, or branding through any channel (digital, in-person, media). Measures awareness and top-of-funnel exposure.' },
+  { key: 'accelerated', label: 'Accelerated', color: '#5796F4', definition: 'All installs + engage. Users who installed the app or actively engaged with content.' },
+  { key: 'engaged', label: 'Engaged', color: '#FF8626', definition: 'Number of engagements on the Goodwall platform, including posts, comments, likes, shares, clicks on banners, clicks on CTAs, survey/quiz responses, watch participant content, watch partner educational content.' },
+  { key: 'trained', label: 'Trained', color: '#F4DD2A', definition: 'Viewed educational content (>1s) OR completed quiz OR survey OR participated in a challenge.' },
+  { key: 'credentialed', label: 'Credentialed', color: '#0D2E24', definition: 'Number of young people who earned a Goodwall credential, badge, or certificate demonstrating verified skill acquisition. (Completed a Goodwall course module or Goodwall course)' }
+];
+
+var STAGE_MAP = {};
+STAGES.forEach(function(s) { STAGE_MAP[s.key] = s; });
+
+var GEO_PRESETS = [
+  { name: 'Global', allocation: 15, cpi: 0.50, reachMultiplier: 100 },
+  { name: 'US', allocation: 20, cpi: 3.00, reachMultiplier: 80 },
+  { name: 'Brazil', allocation: 10, cpi: 0.60, reachMultiplier: 100 },
+  { name: 'Nigeria', allocation: 20, cpi: 0.40, reachMultiplier: 120 },
+  { name: 'Philippines', allocation: 5, cpi: 0.30, reachMultiplier: 150 },
+  { name: 'India', allocation: 10, cpi: 0.24, reachMultiplier: 120 },
+  { name: 'UK', allocation: 5, cpi: 3.00, reachMultiplier: 80 },
+  { name: 'Indonesia', allocation: 5, cpi: 0.10, reachMultiplier: 150 },
+  { name: 'Kenya', allocation: 5, cpi: 0.30, reachMultiplier: 120 },
+  { name: 'South Africa', allocation: 5, cpi: 0.60, reachMultiplier: 100 }
+];
+
+var DEFAULT_BENCHMARKS = { acceleratedToEngaged: 50, engagedToTrained: 89, trainedToCredentialed: 13 };
+
+var BENCHMARK_DEFS = [
+  { key: 'acceleratedToEngaged', label: 'Accelerated \u2192 Engaged', desc: 'Percentage of accelerated users who engage on the platform' },
+  { key: 'engagedToTrained', label: 'Engaged \u2192 Trained', desc: 'Percentage of engaged users who complete training content' },
+  { key: 'trainedToCredentialed', label: 'Trained \u2192 Credentialed', desc: 'Percentage of trained users who earn a credential' }
+];
+
+var DEFAULT_CHANNELS = [
+  { name: 'Meta Ads', platform: 'Meta', adType: 'App Install Campaign', budgetPct: 35, cpi: 0.45, targetStage: 'accelerated' },
+  { name: 'Google UAC', platform: 'Google', adType: 'Universal App Campaign', budgetPct: 25, cpi: 0.60, targetStage: 'accelerated' },
+  { name: 'TikTok Ads', platform: 'TikTok', adType: 'App Install', budgetPct: 15, cpi: 0.35, targetStage: 'accelerated' },
+  { name: 'In-App Banners', platform: 'Goodwall', adType: 'Banner / CTA', budgetPct: 10, cpi: 0.05, targetStage: 'engaged' },
+  { name: 'Community Outreach', platform: 'Organic', adType: 'Community', budgetPct: 10, cpi: 0.10, targetStage: 'reach' },
+  { name: 'Influencer Marketing', platform: 'Various', adType: 'Sponsored Content', budgetPct: 5, cpi: 0.80, targetStage: 'reach' }
+];
+
+var DEFAULT_PARTNERS = [
+  { name: 'Accenture', budget: 45000, geos: ['Global', 'India', 'Brazil'], kpiPriority: 'trained' },
+  { name: 'Microsoft', budget: 51305, geos: ['Global', 'US', 'Nigeria'], kpiPriority: 'credentialed' },
+  { name: 'HP', budget: 63642, geos: ['Nigeria', 'Kenya', 'India'], kpiPriority: 'accelerated' },
+  { name: 'Cognizant', budget: 80000, geos: ['US', 'Brazil', 'India', 'Nigeria'], kpiPriority: 'trained' },
+  { name: 'Github', budget: 25000, geos: ['Global', 'Nigeria'], kpiPriority: 'engaged' },
+  { name: 'UNDP', budget: 24000, geos: ['Global', 'Kenya', 'South Africa', 'Brazil'], kpiPriority: 'credentialed' }
+];
+
+// State
+var state = {
+  activePhase: 'kpiPlanning',
+  mode: 'budgetToKpi',
+  totalBudget: 150000,
+  primaryKpi: 'accelerated',
+  organicBoost: 1.48,
+  targetStage: 'credentialed',
+  targetValue: 313528,
+  geographies: [],
+  benchmarks: { acceleratedToEngaged: 50, engagedToTrained: 89, trainedToCredentialed: 13 },
+  channels: [],
+  partners: [],
+  results: null,
+  requiredBudget: null
+};
+
+var geoIdCounter = 0;
+var channelIdCounter = 0;
+var partnerIdCounter = 0;
+
+function initDefaults() {
+  state.geographies = GEO_PRESETS.map(function(g) { return Object.assign({}, g, { id: ++geoIdCounter }); });
+  state.channels = DEFAULT_CHANNELS.map(function(c) { return Object.assign({}, c, { id: ++channelIdCounter }); });
+  state.partners = DEFAULT_PARTNERS.map(function(p) { return Object.assign({}, p, { id: ++partnerIdCounter, geos: p.geos.slice() }); });
+}
+
+// Formatting
+function fmtNum(n) {
+  if (n == null || isNaN(n)) return '\u2014';
+  if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+  if (Math.abs(n) >= 1e3) return Math.round(n).toLocaleString('en-US');
+  return n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
+function fmtCurrency(n) {
+  if (n == null || isNaN(n)) return '\u2014';
+  return '$' + Math.round(n).toLocaleString('en-US');
+}
+function fmtCurrencyDecimal(n) {
+  if (n == null || isNaN(n) || !isFinite(n)) return '\u2014';
+  if (n < 0.01) return '$' + n.toFixed(4);
+  return '$' + n.toFixed(2);
+}
+function fmtPct(n) {
+  if (n == null || isNaN(n)) return '\u2014';
+  return n.toFixed(1) + '%';
+}
+function parseNumInput(v) {
+  return parseFloat(String(v).replace(/[^0-9.\-]/g, '')) || 0;
+}
+function fmtInputNum(n) {
+  return Math.round(n).toLocaleString('en-US');
+}
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.appendChild(document.createTextNode(str));
+  return div.textContent !== undefined ? div.innerHTML : str;
+}
+
+function tooltipIcon(stageKey) {
+  var s = STAGE_MAP[stageKey];
+  if (!s) return '';
+  return '<span class="tooltip-trigger"><i class="ph ph-info"></i><span class="tooltip-text">' + escapeHtml(s.definition) + '</span></span>';
+}
+
+// Calculation engine
+function calculateBudgetToKpis() {
+  var totalBudget = state.totalBudget;
+  var geographies = state.geographies;
+  var benchmarks = state.benchmarks;
+  var organicBoost = state.organicBoost;
+  var aToE = benchmarks.acceleratedToEngaged / 100;
+  var eToT = benchmarks.engagedToTrained / 100;
+  var tToC = benchmarks.trainedToCredentialed / 100;
+
+  var geoResults = geographies.map(function(geo) {
+    var budget = totalBudget * (geo.allocation / 100);
+    var accelerated = geo.cpi > 0 ? (budget / geo.cpi) * organicBoost : 0;
+    var reach = accelerated * geo.reachMultiplier;
+    var engaged = accelerated * aToE;
+    var trained = engaged * eToT;
+    var credentialed = trained * tToC;
+    return {
+      id: geo.id, name: geo.name, allocation: geo.allocation,
+      cpi: geo.cpi, reachMultiplier: geo.reachMultiplier,
+      budget: budget,
+      reach: Math.round(reach),
+      accelerated: Math.round(accelerated),
+      engaged: Math.round(engaged),
+      trained: Math.round(trained),
+      credentialed: Math.round(credentialed)
+    };
+  });
+
+  var totals = { reach: 0, accelerated: 0, engaged: 0, trained: 0, credentialed: 0 };
+  geoResults.forEach(function(g) {
+    totals.reach += g.reach;
+    totals.accelerated += g.accelerated;
+    totals.engaged += g.engaged;
+    totals.trained += g.trained;
+    totals.credentialed += g.credentialed;
+  });
+
+  state.results = { geoResults: geoResults, totals: totals, totalBudget: totalBudget };
+  state.requiredBudget = null;
+}
+
+function calculateKpiToBudget() {
+  var targetStage = state.targetStage;
+  var targetValue = state.targetValue;
+  var geographies = state.geographies;
+  var benchmarks = state.benchmarks;
+  var organicBoost = state.organicBoost;
+  var aToE = benchmarks.acceleratedToEngaged / 100;
+  var eToT = benchmarks.engagedToTrained / 100;
+  var tToC = benchmarks.trainedToCredentialed / 100;
+
+  var totalAlloc = 0;
+  geographies.forEach(function(g) { totalAlloc += g.allocation; });
+  if (totalAlloc === 0) totalAlloc = 1;
+
+  // Compute accelPerDollar: how many accelerated users per $1 of total budget
+  // For each geo: accel_i = (totalBudget * alloc_i/100 / cpi_i) * organicBoost
+  // So total accel = totalBudget * organicBoost * sum(alloc_i/100 / cpi_i)
+  // Therefore: accelPerDollar = organicBoost * sum(alloc_i/100 / cpi_i)
+  var accelPerDollar = 0;
+  var weightedRM = 0;
+  geographies.forEach(function(g) {
+    if (g.cpi > 0) accelPerDollar += (g.allocation / 100) / g.cpi;
+    weightedRM += g.reachMultiplier * (g.allocation / totalAlloc);
+  });
+  accelPerDollar *= organicBoost;
+  if (accelPerDollar === 0) accelPerDollar = organicBoost / 0.50; // fallback
+  if (weightedRM === 0) weightedRM = 100;
+
+  var acceleratedNeeded = 0;
+  switch (targetStage) {
+    case 'reach':
+      acceleratedNeeded = weightedRM > 0 ? targetValue / weightedRM : 0;
+      break;
+    case 'accelerated':
+      acceleratedNeeded = targetValue;
+      break;
+    case 'engaged':
+      acceleratedNeeded = aToE > 0 ? targetValue / aToE : 0;
+      break;
+    case 'trained':
+      acceleratedNeeded = (aToE * eToT) > 0 ? targetValue / (aToE * eToT) : 0;
+      break;
+    case 'credentialed':
+      acceleratedNeeded = (aToE * eToT * tToC) > 0 ? targetValue / (aToE * eToT * tToC) : 0;
+      break;
+  }
+
+  var requiredBudget = accelPerDollar > 0 ? acceleratedNeeded / accelPerDollar : 0;
+  state.requiredBudget = requiredBudget;
+
+  var savedBudget = state.totalBudget;
+  state.totalBudget = requiredBudget;
+  calculateBudgetToKpis();
+  state.totalBudget = savedBudget;
+  state.requiredBudget = requiredBudget;
+}
+
+function recalculate() {
+  if (state.mode === 'budgetToKpi') {
+    calculateBudgetToKpis();
+  } else {
+    calculateKpiToBudget();
+  }
+}
+
+// DOM helpers — safe element building
+function setContent(id, htmlContent) {
+  var el = document.getElementById(id);
+  if (el) el.innerHTML = htmlContent;
+}
+
+// Render KPI Planning
+function renderKpiPlanning() {
+  recalculate();
+  var r = state.results;
+  if (!r) return;
+
+  var effectiveBudget = state.mode === 'kpiToBudget' ? state.requiredBudget : state.totalBudget;
+  var pkpi = state.primaryKpi;
+  var pkpiStage = STAGE_MAP[pkpi] || {};
+
+  var topHtml = '<div class="summary-card"><div class="summary-card-accent" style="background:var(--gw-green)"></div><div class="summary-card-label">Total Budget</div><div class="summary-card-value">' + fmtCurrency(effectiveBudget) + '</div>' + (state.mode === 'kpiToBudget' ? '<div class="summary-card-sub">Required budget</div>' : '') + '</div>';
+  topHtml += '<div class="summary-card' + (pkpi ? ' highlight' : '') + '"><div class="summary-card-accent" style="background:' + (pkpiStage.color || '#15C970') + '"></div><div class="summary-card-label">Primary KPI: ' + escapeHtml(pkpiStage.label || '\u2014') + ' ' + tooltipIcon(pkpi) + '</div><div class="summary-card-value">' + fmtNum(r.totals[pkpi]) + '</div></div>';
+  topHtml += '<div class="summary-card"><div class="summary-card-accent" style="background:var(--gw-blue)"></div><div class="summary-card-label">Cost per ' + escapeHtml(pkpiStage.label || 'KPI') + '</div><div class="summary-card-value">' + (r.totals[pkpi] > 0 ? fmtCurrencyDecimal(effectiveBudget / r.totals[pkpi]) : '\u2014') + '</div></div>';
+  setContent('kpi-summary-top', topHtml);
+
+  renderGeoTable(effectiveBudget);
+  renderBenchmarkTable();
+  renderFunnelViz('funnel-viz', r.totals);
+  renderFunnelTable(r.totals, effectiveBudget);
+  renderKpiSummaryCards(r.totals, effectiveBudget);
+  renderGeoBreakdown(r.geoResults, r.totals, effectiveBudget);
+}
+
+function renderGeoTable(effectiveBudget) {
+  var geographies = state.geographies;
+  var benchmarks = state.benchmarks;
+  var aToE = benchmarks.acceleratedToEngaged / 100;
+  var eToT = benchmarks.engagedToTrained / 100;
+  var tToC = benchmarks.trainedToCredentialed / 100;
+
+  var totalAlloc = 0, totalBudget = 0, totalReach = 0, totalAccel = 0, totalEngaged = 0, totalTrained = 0, totalCred = 0;
+  var rows = '';
+
+  geographies.forEach(function(geo) {
+    var budget = effectiveBudget * (geo.allocation / 100);
+    var accel = geo.cpi > 0 ? (budget / geo.cpi) * state.organicBoost : 0;
+    var reach = accel * geo.reachMultiplier;
+    var engaged = accel * aToE;
+    var trained = engaged * eToT;
+    var cred = trained * tToC;
+    totalAlloc += geo.allocation; totalBudget += budget; totalReach += reach;
+    totalAccel += accel; totalEngaged += engaged; totalTrained += trained; totalCred += cred;
+
+    rows += '<tr data-geo-id="' + geo.id + '">'
+      + '<td><input class="input-inline" style="width:110px;text-align:left" value="' + escapeHtml(geo.name) + '" data-field="name" oninput="updateGeo(' + geo.id + ',\'name\',this.value)"></td>'
+      + '<td><input class="input-inline" style="width:60px" value="' + geo.allocation + '" data-field="allocation" oninput="updateGeo(' + geo.id + ',\'allocation\',this.value)">%</td>'
+      + '<td>' + fmtCurrency(budget) + '</td>'
+      + '<td><input class="input-inline" style="width:60px" value="' + geo.cpi + '" data-field="cpi" oninput="updateGeo(' + geo.id + ',\'cpi\',this.value)"></td>'
+      + '<td><input class="input-inline" style="width:60px" value="' + geo.reachMultiplier + '" data-field="reachMultiplier" oninput="updateGeo(' + geo.id + ',\'reachMultiplier\',this.value)"></td>'
+      + '<td>' + fmtNum(reach) + '</td>'
+      + '<td>' + fmtNum(accel) + '</td>'
+      + '<td>' + fmtNum(engaged) + '</td>'
+      + '<td>' + fmtNum(trained) + '</td>'
+      + '<td>' + fmtNum(cred) + '</td>'
+      + '<td><button class="btn-icon" onclick="removeGeo(' + geo.id + ')" title="Remove"><i class="ph ph-x"></i></button></td>'
+      + '</tr>';
+  });
+
+  rows += '<tr class="total-row"><td><strong>Total</strong></td><td><strong>' + fmtPct(totalAlloc) + '</strong></td><td><strong>' + fmtCurrency(totalBudget) + '</strong></td><td></td><td></td><td><strong>' + fmtNum(totalReach) + '</strong></td><td><strong>' + fmtNum(totalAccel) + '</strong></td><td><strong>' + fmtNum(totalEngaged) + '</strong></td><td><strong>' + fmtNum(totalTrained) + '</strong></td><td><strong>' + fmtNum(totalCred) + '</strong></td><td></td></tr>';
+  setContent('geo-table-body', rows);
+
+  var colors = ['#15C970', '#5796F4', '#FF8626', '#F4DD2A', '#0D2E24', '#15C970', '#5796F4', '#FF8626', '#F4DD2A', '#0D2E24'];
+  var barHtml = '';
+  geographies.forEach(function(g, i) {
+    barHtml += '<div class="alloc-segment" style="width:' + g.allocation + '%;background:' + colors[i % colors.length] + '" title="' + escapeHtml(g.name) + ': ' + g.allocation + '%"></div>';
+  });
+  setContent('alloc-bar', barHtml);
+
+  if (Math.abs(totalAlloc - 100) > 0.1) {
+    setContent('alloc-warning', '<div class="alloc-warning"><i class="ph ph-warning"></i> Allocation totals ' + fmtPct(totalAlloc) + ' \u2014 should be 100%</div>');
+  } else {
+    setContent('alloc-warning', '');
+  }
+}
+
+function renderBenchmarkTable() {
+  var rows = '';
+  BENCHMARK_DEFS.forEach(function(b) {
+    rows += '<tr><td><strong>' + escapeHtml(b.label) + '</strong></td><td><input class="input-inline" style="width:70px" value="' + state.benchmarks[b.key] + '" oninput="updateBenchmark(\'' + b.key + '\',this.value)">%</td><td class="text-muted" style="font-size:12px">' + escapeHtml(b.desc) + '</td></tr>';
+  });
+  setContent('benchmark-table-body', rows);
+}
+
+function renderFunnelViz(containerId, totals) {
+  var maxVal = 1;
+  STAGES.forEach(function(s) { if ((totals[s.key] || 0) > maxVal) maxVal = totals[s.key]; });
+  var prevVal = null;
+  var html = '';
+  STAGES.forEach(function(s) {
+    var val = totals[s.key] || 0;
+    var pct = Math.max((val / maxVal) * 100, 3);
+    var rate = prevVal != null && prevVal > 0 ? ((val / prevVal) * 100).toFixed(1) + '%' : '';
+    var isHighlight = s.key === state.primaryKpi;
+    html += '<div class="funnel-row"><div class="funnel-label">' + escapeHtml(s.label) + ' ' + tooltipIcon(s.key) + '</div><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:' + pct + '%;background:' + s.color + (isHighlight ? '' : 'cc') + '"><span class="funnel-bar-value">' + fmtNum(val) + '</span></div></div><div class="funnel-count">' + fmtNum(val) + '</div><div class="funnel-rate">' + rate + '</div></div>';
+    prevVal = val;
+  });
+  setContent(containerId, html);
+}
+
+function renderFunnelTable(totals, budget) {
+  var prevVal = null;
+  var html = '';
+  STAGES.forEach(function(s) {
+    var val = totals[s.key] || 0;
+    var rate = prevVal != null && prevVal > 0 ? fmtPct((val / prevVal) * 100) : '\u2014';
+    var cpu = val > 0 ? fmtCurrencyDecimal(budget / val) : '\u2014';
+    var isHighlight = s.key === state.primaryKpi;
+    html += '<tr' + (isHighlight ? ' style="background:var(--gw-green-light)"' : '') + '><td><strong>' + escapeHtml(s.label) + '</strong> ' + tooltipIcon(s.key) + '</td><td><strong>' + fmtNum(val) + '</strong></td><td>' + rate + '</td><td>' + cpu + '</td></tr>';
+    prevVal = val;
+  });
+  setContent('funnel-table-body', html);
+}
+
+function renderKpiSummaryCards(totals, budget) {
+  var html = '';
+  STAGES.forEach(function(s) {
+    var val = totals[s.key] || 0;
+    var cpu = val > 0 ? fmtCurrencyDecimal(budget / val) : '\u2014';
+    var isHighlight = s.key === state.primaryKpi;
+    html += '<div class="summary-card' + (isHighlight ? ' highlight' : '') + '"><div class="summary-card-accent" style="background:' + s.color + '"></div><div class="summary-card-label">' + escapeHtml(s.label) + ' ' + tooltipIcon(s.key) + '</div><div class="summary-card-value" style="color:' + s.color + '">' + fmtNum(val) + '</div><div class="summary-card-sub">Cost: ' + cpu + ' per user</div></div>';
+  });
+  setContent('kpi-summary-cards', html);
+}
+
+function renderGeoBreakdown(geoResults, totals, effectiveBudget) {
+  var html = '';
+  geoResults.forEach(function(g) {
+    html += '<tr><td><strong>' + escapeHtml(g.name) + '</strong></td><td>' + fmtCurrency(g.budget) + '</td><td>' + fmtNum(g.reach) + '</td><td>' + fmtNum(g.accelerated) + '</td><td>' + fmtNum(g.engaged) + '</td><td>' + fmtNum(g.trained) + '</td><td>' + fmtNum(g.credentialed) + '</td></tr>';
+  });
+  html += '<tr class="total-row"><td><strong>Total</strong></td><td><strong>' + fmtCurrency(effectiveBudget) + '</strong></td><td><strong>' + fmtNum(totals.reach) + '</strong></td><td><strong>' + fmtNum(totals.accelerated) + '</strong></td><td><strong>' + fmtNum(totals.engaged) + '</strong></td><td><strong>' + fmtNum(totals.trained) + '</strong></td><td><strong>' + fmtNum(totals.credentialed) + '</strong></td></tr>';
+  setContent('geo-breakdown-body', html);
+}
+
+// Render Channel Strategy
+function renderChannelStrategy() {
+  recalculate();
+  var effectiveBudget = state.mode === 'kpiToBudget' ? (state.requiredBudget || 0) : state.totalBudget;
+  var totalChannelAlloc = 0;
+  var totalEstUsers = 0;
+  state.channels.forEach(function(c) {
+    totalChannelAlloc += c.budgetPct;
+    var cb = effectiveBudget * (c.budgetPct / 100);
+    if (c.cpi > 0) totalEstUsers += cb / c.cpi;
+  });
+  var totalChannelBudget = effectiveBudget * (totalChannelAlloc / 100);
+
+  setContent('channel-summary', '<div class="summary-card"><div class="summary-card-accent" style="background:var(--gw-green)"></div><div class="summary-card-label">KPI Planning Budget</div><div class="summary-card-value">' + fmtCurrency(effectiveBudget) + '</div></div><div class="summary-card"><div class="summary-card-accent" style="background:var(--gw-blue)"></div><div class="summary-card-label">Allocated to Channels</div><div class="summary-card-value">' + fmtCurrency(totalChannelBudget) + '</div><div class="summary-card-sub">' + fmtPct(totalChannelAlloc) + ' of budget</div></div><div class="summary-card"><div class="summary-card-accent" style="background:var(--gw-orange)"></div><div class="summary-card-label">Est. Total Users</div><div class="summary-card-value">' + fmtNum(totalEstUsers) + '</div></div>');
+
+  var rows = '';
+  var totalAlloc = 0;
+  state.channels.forEach(function(ch) {
+    var cb = effectiveBudget * (ch.budgetPct / 100);
+    var users = ch.cpi > 0 ? cb / ch.cpi : 0;
+    totalAlloc += ch.budgetPct;
+    var stageOptions = '';
+    STAGES.forEach(function(s) {
+      stageOptions += '<option value="' + s.key + '"' + (s.key === ch.targetStage ? ' selected' : '') + '>' + escapeHtml(s.label) + '</option>';
+    });
+    rows += '<tr>'
+      + '<td><input class="input-inline" style="width:130px;text-align:left" value="' + escapeHtml(ch.name) + '" oninput="updateChannel(' + ch.id + ',\'name\',this.value)"></td>'
+      + '<td><input class="input-inline" style="width:90px;text-align:left" value="' + escapeHtml(ch.platform) + '" oninput="updateChannel(' + ch.id + ',\'platform\',this.value)"></td>'
+      + '<td><input class="input-inline" style="width:140px;text-align:left" value="' + escapeHtml(ch.adType) + '" oninput="updateChannel(' + ch.id + ',\'adType\',this.value)"></td>'
+      + '<td><input class="input-inline" style="width:55px" value="' + ch.budgetPct + '" oninput="updateChannel(' + ch.id + ',\'budgetPct\',this.value)">%</td>'
+      + '<td>' + fmtCurrency(cb) + '</td>'
+      + '<td><input class="input-inline" style="width:60px" value="' + ch.cpi + '" oninput="updateChannel(' + ch.id + ',\'cpi\',this.value)"></td>'
+      + '<td><select class="input-inline" style="width:110px;text-align:left" onchange="updateChannel(' + ch.id + ',\'targetStage\',this.value)">' + stageOptions + '</select></td>'
+      + '<td>' + fmtNum(users) + '</td>'
+      + '<td><button class="btn-icon" onclick="removeChannel(' + ch.id + ')" title="Remove"><i class="ph ph-x"></i></button></td>'
+      + '</tr>';
+  });
+  rows += '<tr class="total-row"><td colspan="3"><strong>Total</strong></td><td><strong>' + fmtPct(totalAlloc) + '</strong></td><td><strong>' + fmtCurrency(effectiveBudget * totalAlloc / 100) + '</strong></td><td></td><td></td><td><strong>' + fmtNum(totalEstUsers) + '</strong></td><td></td></tr>';
+  setContent('channel-table-body', rows);
+
+  var colors = ['#15C970', '#5796F4', '#FF8626', '#F4DD2A', '#0D2E24', '#15C970'];
+  var barHtml = '';
+  state.channels.forEach(function(c, i) {
+    barHtml += '<div class="alloc-segment" style="width:' + c.budgetPct + '%;background:' + colors[i % colors.length] + '" title="' + escapeHtml(c.name) + ': ' + c.budgetPct + '%"></div>';
+  });
+  setContent('channel-alloc-bar', barHtml);
+
+  if (Math.abs(totalAlloc - 100) > 0.1) {
+    setContent('channel-alloc-warning', '<div class="alloc-warning"><i class="ph ph-warning"></i> Channel allocation totals ' + fmtPct(totalAlloc) + ' \u2014 should be 100%</div>');
+  } else {
+    setContent('channel-alloc-warning', '');
+  }
+
+  renderChannelFunnel(effectiveBudget);
+}
+
+function renderChannelFunnel(effectiveBudget) {
+  var benchmarks = state.benchmarks;
+  var aToE = benchmarks.acceleratedToEngaged / 100;
+  var eToT = benchmarks.engagedToTrained / 100;
+  var tToC = benchmarks.trainedToCredentialed / 100;
+
+  var stageContributions = {};
+  STAGES.forEach(function(s) { stageContributions[s.key] = 0; });
+
+  var totalAllocGeo = 0;
+  state.geographies.forEach(function(g) { totalAllocGeo += g.allocation; });
+  if (totalAllocGeo === 0) totalAllocGeo = 1;
+  var avgRM = 0;
+  state.geographies.forEach(function(g) { avgRM += g.reachMultiplier * (g.allocation / totalAllocGeo); });
+  if (avgRM === 0) avgRM = 100;
+
+  state.channels.forEach(function(ch) {
+    var cb = effectiveBudget * (ch.budgetPct / 100);
+    var users = ch.cpi > 0 ? cb / ch.cpi : 0;
+    var ts = ch.targetStage;
+    stageContributions[ts] += users;
+
+    var stageOrder = STAGES.map(function(s) { return s.key; });
+    var idx = stageOrder.indexOf(ts);
+    var rates = [1, 1, aToE, eToT, tToC];
+    var current = users;
+    for (var i = idx + 1; i < stageOrder.length; i++) {
+      current *= rates[i];
+      stageContributions[stageOrder[i]] += current;
+    }
+    if (idx === 1) {
+      stageContributions.reach += users * avgRM;
+    } else if (idx === 0) {
+      // nothing upstream
+    }
+  });
+
+  renderFunnelViz('channel-funnel-viz', stageContributions);
+}
+
+// Render Partner Marketing Pool
+function renderPartnerPool() {
+  recalculate();
+  var allGeoNames = [];
+  var geoNameSet = {};
+  GEO_PRESETS.forEach(function(g) { if (!geoNameSet[g.name]) { allGeoNames.push(g.name); geoNameSet[g.name] = true; } });
+  state.geographies.forEach(function(g) { if (!geoNameSet[g.name]) { allGeoNames.push(g.name); geoNameSet[g.name] = true; } });
+
+  var totalBudget = 0;
+  var rows = '';
+  state.partners.forEach(function(p) {
+    totalBudget += p.budget;
+    var geoChips = '';
+    p.geos.forEach(function(g) {
+      geoChips += '<span class="chip chip-green">' + escapeHtml(g) + ' <span class="chip-remove" onclick="removePartnerGeo(' + p.id + ',\'' + escapeHtml(g) + '\')">&times;</span></span>';
+    });
+
+    var geoOptions = '';
+    allGeoNames.forEach(function(g) {
+      geoOptions += '<div class="multi-select-option" onclick="addPartnerGeo(' + p.id + ',\'' + escapeHtml(g) + '\')"><span>' + escapeHtml(g) + '</span></div>';
+    });
+
+    var stageOptions = '';
+    STAGES.forEach(function(s) {
+      stageOptions += '<option value="' + s.key + '"' + (s.key === p.kpiPriority ? ' selected' : '') + '>' + escapeHtml(s.label) + '</option>';
+    });
+
+    rows += '<tr>'
+      + '<td><input class="input-inline" style="width:120px;text-align:left" value="' + escapeHtml(p.name) + '" oninput="updatePartner(' + p.id + ',\'name\',this.value)"></td>'
+      + '<td><input class="input-inline" style="width:90px" value="' + p.budget + '" oninput="updatePartner(' + p.id + ',\'budget\',this.value)"></td>'
+      + '<td>' + geoChips + '<div class="multi-select" style="display:inline-block;vertical-align:middle;margin-left:4px"><button class="btn btn-sm btn-secondary" style="padding:2px 6px;font-size:11px" onclick="toggleGeoDropdown(' + p.id + ',event)"><i class="ph ph-plus"></i></button><div class="multi-select-dropdown" id="geo-dd-' + p.id + '">' + geoOptions + '</div></div></td>'
+      + '<td><select class="input-inline" style="width:110px;text-align:left" onchange="updatePartner(' + p.id + ',\'kpiPriority\',this.value)">' + stageOptions + '</select></td>'
+      + '<td><button class="btn-icon" onclick="removePartner(' + p.id + ')" title="Remove"><i class="ph ph-x"></i></button></td>'
+      + '</tr>';
+  });
+  rows += '<tr class="total-row"><td><strong>Total (' + state.partners.length + ' partners)</strong></td><td><strong>' + fmtCurrency(totalBudget) + '</strong></td><td colspan="3"></td></tr>';
+  setContent('partner-table-body', rows);
+
+  var geoCount = 0;
+  var geoSeen = {};
+  state.partners.forEach(function(p) { p.geos.forEach(function(g) { if (!geoSeen[g]) { geoCount++; geoSeen[g] = true; } }); });
+
+  setContent('pool-summary', '<div class="summary-card"><div class="summary-card-accent" style="background:var(--gw-green)"></div><div class="summary-card-label">Total Pool Budget</div><div class="summary-card-value">' + fmtCurrency(totalBudget) + '</div><div class="summary-card-sub">' + state.partners.length + ' partners</div></div><div class="summary-card"><div class="summary-card-accent" style="background:var(--gw-blue)"></div><div class="summary-card-label">Geographies Covered</div><div class="summary-card-value">' + geoCount + '</div></div><div class="summary-card"><div class="summary-card-accent" style="background:var(--gw-orange)"></div><div class="summary-card-label">Avg Budget / Partner</div><div class="summary-card-value">' + (state.partners.length > 0 ? fmtCurrency(totalBudget / state.partners.length) : '\u2014') + '</div></div>');
+
+  renderPoolByGeo(totalBudget);
+  renderPoolFunnel();
+}
+
+function renderPoolByGeo(totalPoolBudget) {
+  var benchmarks = state.benchmarks;
+  var organicBoost = state.organicBoost;
+  var aToE = benchmarks.acceleratedToEngaged / 100;
+  var eToT = benchmarks.engagedToTrained / 100;
+  var tToC = benchmarks.trainedToCredentialed / 100;
+
+  var geoLookup = {};
+  state.geographies.forEach(function(g) { geoLookup[g.name] = g; });
+
+  var geoPool = {};
+  state.partners.forEach(function(p) {
+    if (p.geos.length === 0) return;
+    var perGeo = p.budget / p.geos.length;
+    p.geos.forEach(function(g) {
+      if (!geoPool[g]) geoPool[g] = { budget: 0, partners: 0 };
+      geoPool[g].budget += perGeo;
+      geoPool[g].partners += 1;
+    });
+  });
+
+  var entries = Object.keys(geoPool).map(function(k) { return [k, geoPool[k]]; }).sort(function(a, b) { return b[1].budget - a[1].budget; });
+
+  var html = '';
+  var grandAccel = 0, grandTrained = 0, grandCred = 0, grandBudget = 0;
+
+  entries.forEach(function(entry) {
+    var geoName = entry[0];
+    var data = entry[1];
+    var geo = geoLookup[geoName] || { cpi: 0.50 };
+    var accel = geo.cpi > 0 ? (data.budget / geo.cpi) * organicBoost : 0;
+    var trained = accel * aToE * eToT;
+    var cred = trained * tToC;
+    var pctPool = totalPoolBudget > 0 ? (data.budget / totalPoolBudget * 100) : 0;
+
+    grandAccel += accel; grandTrained += trained; grandCred += cred; grandBudget += data.budget;
+
+    html += '<tr><td><strong>' + escapeHtml(geoName) + '</strong></td><td>' + fmtCurrency(data.budget) + '</td><td>' + data.partners + '</td><td>' + fmtPct(pctPool) + '</td><td>' + fmtNum(accel) + '</td><td>' + fmtNum(trained) + '</td><td>' + fmtNum(cred) + '</td></tr>';
+  });
+
+  html += '<tr class="total-row"><td><strong>Total</strong></td><td><strong>' + fmtCurrency(grandBudget) + '</strong></td><td></td><td><strong>100%</strong></td><td><strong>' + fmtNum(grandAccel) + '</strong></td><td><strong>' + fmtNum(grandTrained) + '</strong></td><td><strong>' + fmtNum(grandCred) + '</strong></td></tr>';
+  setContent('pool-geo-body', html);
+}
+
+function renderPoolFunnel() {
+  var benchmarks = state.benchmarks;
+  var organicBoost = state.organicBoost;
+  var aToE = benchmarks.acceleratedToEngaged / 100;
+  var eToT = benchmarks.engagedToTrained / 100;
+  var tToC = benchmarks.trainedToCredentialed / 100;
+
+  var geoLookup = {};
+  state.geographies.forEach(function(g) { geoLookup[g.name] = g; });
+
+  var geoPool = {};
+  state.partners.forEach(function(p) {
+    if (p.geos.length === 0) return;
+    var perGeo = p.budget / p.geos.length;
+    p.geos.forEach(function(g) {
+      if (!geoPool[g]) geoPool[g] = 0;
+      geoPool[g] += perGeo;
+    });
+  });
+
+  var totals = { reach: 0, accelerated: 0, engaged: 0, trained: 0, credentialed: 0 };
+  var totalBudget = 0;
+
+  Object.keys(geoPool).forEach(function(geoName) {
+    var budget = geoPool[geoName];
+    var geo = geoLookup[geoName] || { cpi: 0.50, reachMultiplier: 100 };
+    var accel = geo.cpi > 0 ? (budget / geo.cpi) * organicBoost : 0;
+    var reach = accel * (geo.reachMultiplier || 100);
+    var engaged = accel * aToE;
+    var trained = engaged * eToT;
+    var cred = trained * tToC;
+    totals.reach += reach; totals.accelerated += accel; totals.engaged += engaged;
+    totals.trained += trained; totals.credentialed += cred;
+    totalBudget += budget;
+  });
+
+  renderFunnelViz('pool-funnel-viz', totals);
+
+  var html = '';
+  STAGES.forEach(function(s) {
+    var val = totals[s.key] || 0;
+    var cpu = val > 0 ? fmtCurrencyDecimal(totalBudget / val) : '\u2014';
+    html += '<div class="summary-card"><div class="summary-card-accent" style="background:' + s.color + '"></div><div class="summary-card-label">' + escapeHtml(s.label) + ' ' + tooltipIcon(s.key) + '</div><div class="summary-card-value" style="color:' + s.color + '">' + fmtNum(val) + '</div><div class="summary-card-sub">Cost: ' + cpu + ' per user</div></div>';
+  });
+  setContent('pool-kpi-cards', html);
+}
+
+// Event handlers
+function switchPhase(phase) {
+  state.activePhase = phase;
+  document.querySelectorAll('.phase-tab').forEach(function(t) { t.classList.toggle('active', t.dataset.phase === phase); });
+  document.querySelectorAll('.phase-content').forEach(function(p) { p.classList.remove('active'); });
+  document.getElementById('phase-' + phase).classList.add('active');
+  render();
+  saveState();
+}
+
+function setMode(mode) {
+  state.mode = mode;
+  document.querySelectorAll('.toggle-option').forEach(function(o) { o.classList.toggle('active', o.dataset.mode === mode); });
+  document.getElementById('budget-input-section').style.display = mode === 'budgetToKpi' ? 'block' : 'none';
+  document.getElementById('kpi-target-section').style.display = mode === 'kpiToBudget' ? 'block' : 'none';
+  render();
+  saveState();
+}
+
+function onBudgetInput(el) {
+  state.totalBudget = parseNumInput(el.value);
+  render();
+  saveState();
+}
+
+function onPrimaryKpiChange(el) {
+  state.primaryKpi = el.value;
+  document.getElementById('primaryKpi').value = el.value;
+  document.getElementById('primaryKpiTarget').value = el.value;
+  render();
+  saveState();
+}
+
+function onOrganicBoostInput(el) {
+  state.organicBoost = parseFloat(el.value) || 1;
+  document.getElementById('organicBoost').value = el.value;
+  document.getElementById('organicBoostTarget').value = el.value;
+  render();
+  saveState();
+}
+
+function onTargetStageChange(el) {
+  state.targetStage = el.value;
+  state.primaryKpi = el.value;
+  document.getElementById('primaryKpiTarget').value = el.value;
+  render();
+  saveState();
+}
+
+function onTargetValueInput(el) {
+  state.targetValue = parseNumInput(el.value);
+  render();
+  saveState();
+}
+
+function updateGeo(id, field, value) {
+  var geo = null;
+  for (var i = 0; i < state.geographies.length; i++) {
+    if (state.geographies[i].id === id) { geo = state.geographies[i]; break; }
+  }
+  if (!geo) return;
+  if (field === 'name') { geo[field] = value; }
+  else { geo[field] = parseFloat(value) || 0; }
+  render();
+  saveState();
+}
+
+function addGeography() {
+  state.geographies.push({ id: ++geoIdCounter, name: 'New Region', allocation: 0, cpi: 0.50, reachMultiplier: 100 });
+  render();
+  saveState();
+}
+
+function removeGeo(id) {
+  state.geographies = state.geographies.filter(function(g) { return g.id !== id; });
+  render();
+  saveState();
+}
+
+function updateBenchmark(key, value) {
+  state.benchmarks[key] = parseFloat(value) || 0;
+  render();
+  saveState();
+}
+
+function updateChannel(id, field, value) {
+  var ch = null;
+  for (var i = 0; i < state.channels.length; i++) {
+    if (state.channels[i].id === id) { ch = state.channels[i]; break; }
+  }
+  if (!ch) return;
+  if (field === 'budgetPct' || field === 'cpi') { ch[field] = parseFloat(value) || 0; }
+  else { ch[field] = value; }
+  render();
+  saveState();
+}
+
+function addChannel() {
+  state.channels.push({ id: ++channelIdCounter, name: 'New Channel', platform: 'Platform', adType: 'Ad Type', budgetPct: 0, cpi: 0.50, targetStage: 'accelerated' });
+  render();
+  saveState();
+}
+
+function removeChannel(id) {
+  state.channels = state.channels.filter(function(c) { return c.id !== id; });
+  render();
+  saveState();
+}
+
+function updatePartner(id, field, value) {
+  var p = null;
+  for (var i = 0; i < state.partners.length; i++) {
+    if (state.partners[i].id === id) { p = state.partners[i]; break; }
+  }
+  if (!p) return;
+  if (field === 'budget') { p[field] = parseFloat(value) || 0; }
+  else { p[field] = value; }
+  render();
+  saveState();
+}
+
+function addPartner() {
+  state.partners.push({ id: ++partnerIdCounter, name: 'New Partner', budget: 0, geos: ['Global'], kpiPriority: 'accelerated' });
+  render();
+  saveState();
+}
+
+function removePartner(id) {
+  state.partners = state.partners.filter(function(p) { return p.id !== id; });
+  render();
+  saveState();
+}
+
+function toggleGeoDropdown(partnerId, event) {
+  event.stopPropagation();
+  var dd = document.getElementById('geo-dd-' + partnerId);
+  var isOpen = dd.classList.contains('open');
+  document.querySelectorAll('.multi-select-dropdown').forEach(function(d) { d.classList.remove('open'); });
+  if (!isOpen) dd.classList.add('open');
+}
+
+function addPartnerGeo(partnerId, geoName) {
+  var p = null;
+  for (var i = 0; i < state.partners.length; i++) {
+    if (state.partners[i].id === partnerId) { p = state.partners[i]; break; }
+  }
+  if (!p) return;
+  if (p.geos.indexOf(geoName) === -1) { p.geos.push(geoName); }
+  document.querySelectorAll('.multi-select-dropdown').forEach(function(d) { d.classList.remove('open'); });
+  render();
+  saveState();
+}
+
+function removePartnerGeo(partnerId, geoName) {
+  var p = null;
+  for (var i = 0; i < state.partners.length; i++) {
+    if (state.partners[i].id === partnerId) { p = state.partners[i]; break; }
+  }
+  if (!p) return;
+  p.geos = p.geos.filter(function(g) { return g !== geoName; });
+  render();
+  saveState();
+}
+
+document.addEventListener('click', function() {
+  document.querySelectorAll('.multi-select-dropdown').forEach(function(d) { d.classList.remove('open'); });
+});
+
+// Render dispatch
+function render() {
+  switch (state.activePhase) {
+    case 'kpiPlanning': renderKpiPlanning(); break;
+    case 'channelStrategy': renderChannelStrategy(); break;
+    case 'partnerPool': renderPartnerPool(); break;
+  }
+}
+
+// Persistence
+var STORAGE_KEY = 'goodwall_kpi_calculator_v2';
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      mode: state.mode, totalBudget: state.totalBudget, primaryKpi: state.primaryKpi,
+      organicBoost: state.organicBoost, targetStage: state.targetStage, targetValue: state.targetValue,
+      geographies: state.geographies, benchmarks: state.benchmarks, channels: state.channels,
+      partners: state.partners, activePhase: state.activePhase
+    }));
+  } catch (e) { /* quota exceeded or private browsing */ }
+}
+
+function loadState() {
+  try {
+    var saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (saved) {
+      Object.keys(saved).forEach(function(k) { state[k] = saved[k]; });
+      var maxGeo = 0, maxCh = 0, maxP = 0;
+      state.geographies.forEach(function(g) { if (g.id > maxGeo) maxGeo = g.id; });
+      state.channels.forEach(function(c) { if (c.id > maxCh) maxCh = c.id; });
+      state.partners.forEach(function(p) { if (p.id > maxP) maxP = p.id; });
+      geoIdCounter = maxGeo + 1;
+      channelIdCounter = maxCh + 1;
+      partnerIdCounter = maxP + 1;
+      return true;
+    }
+  } catch (e) { /* corrupted or missing */ }
+  return false;
+}
+
+function resetState() {
+  if (!confirm('Reset all data to defaults?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  geoIdCounter = 0; channelIdCounter = 0; partnerIdCounter = 0;
+  state = {
+    activePhase: 'kpiPlanning', mode: 'budgetToKpi', totalBudget: 150000,
+    primaryKpi: 'accelerated', organicBoost: 1.48, targetStage: 'credentialed',
+    targetValue: 313528, geographies: [], benchmarks: { acceleratedToEngaged: 50, engagedToTrained: 89, trainedToCredentialed: 13 },
+    channels: [], partners: [], results: null, requiredBudget: null
+  };
+  initDefaults();
+  document.getElementById('totalBudget').value = '150,000';
+  document.getElementById('primaryKpi').value = 'accelerated';
+  document.getElementById('organicBoost').value = '1.48';
+  document.getElementById('organicBoostTarget').value = '1.48';
+  document.getElementById('targetStage').value = 'credentialed';
+  document.getElementById('targetValue').value = '313,528';
+  document.getElementById('primaryKpiTarget').value = 'credentialed';
+  setMode('budgetToKpi');
+  switchPhase('kpiPlanning');
+}
+
+// CSV Export
+function exportCSV() {
+  var csv = '';
+  var phase = state.activePhase;
+
+  if (phase === 'kpiPlanning') {
+    recalculate();
+    var r = state.results;
+    var eb = state.mode === 'kpiToBudget' ? state.requiredBudget : state.totalBudget;
+    csv += 'KPI Funnel Summary\n';
+    csv += 'Stage,Count,Conv Rate,Cost per User\n';
+    var prev = null;
+    STAGES.forEach(function(s) {
+      var v = r.totals[s.key];
+      var rate = prev != null && prev > 0 ? ((v / prev) * 100).toFixed(1) + '%' : '';
+      var cpu = v > 0 ? (eb / v).toFixed(4) : '';
+      csv += s.label + ',' + v + ',' + rate + ',' + cpu + '\n';
+      prev = v;
+    });
+    csv += '\nGeographic Breakdown\n';
+    csv += 'Geography,Budget,Reach,Accelerated,Engaged,Trained,Credentialed\n';
+    r.geoResults.forEach(function(g) {
+      csv += g.name + ',' + g.budget.toFixed(0) + ',' + g.reach + ',' + g.accelerated + ',' + g.engaged + ',' + g.trained + ',' + g.credentialed + '\n';
+    });
+  } else if (phase === 'channelStrategy') {
+    var eb2 = state.mode === 'kpiToBudget' ? (state.requiredBudget || 0) : state.totalBudget;
+    csv += 'Channel Strategy\n';
+    csv += 'Channel,Platform,Ad Type,Budget %,Budget ($),CPI,Target Stage,Est Users\n';
+    state.channels.forEach(function(ch) {
+      var cb = eb2 * (ch.budgetPct / 100);
+      var users = ch.cpi > 0 ? Math.round(cb / ch.cpi) : 0;
+      csv += ch.name + ',' + ch.platform + ',' + ch.adType + ',' + ch.budgetPct + '%,' + cb.toFixed(0) + ',' + ch.cpi + ',' + ch.targetStage + ',' + users + '\n';
+    });
+  } else if (phase === 'partnerPool') {
+    csv += 'Partner Marketing Pool\n';
+    csv += 'Partner,Budget,Geographies,KPI Priority\n';
+    state.partners.forEach(function(p) {
+      csv += p.name + ',' + p.budget + ',"' + p.geos.join(', ') + '",' + p.kpiPriority + '\n';
+    });
+  }
+
+  var blob = new Blob([csv], { type: 'text/csv' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'goodwall-kpi-' + phase + '-' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Floating tooltip system
+var tooltipEl = document.createElement('div');
+tooltipEl.className = 'gw-tooltip-float';
+document.body.appendChild(tooltipEl);
+
+document.addEventListener('mouseover', function(e) {
+  var trigger = e.target.closest('.tooltip-trigger');
+  if (!trigger) return;
+  var textEl = trigger.querySelector('.tooltip-text');
+  if (!textEl) return;
+  tooltipEl.textContent = textEl.textContent;
+  var rect = trigger.getBoundingClientRect();
+  var tipW = 280;
+  var tipH = tooltipEl.offsetHeight || 60;
+  // Prefer above, fall back to below if near top
+  var above = rect.top > tipH + 16;
+  var top = above ? rect.top - tipH - 8 : rect.bottom + 8;
+  var left = rect.left + rect.width / 2 - tipW / 2;
+  // Clamp horizontally
+  if (left < 8) left = 8;
+  if (left + tipW > window.innerWidth - 8) left = window.innerWidth - tipW - 8;
+  tooltipEl.style.top = top + 'px';
+  tooltipEl.style.left = left + 'px';
+  tooltipEl.className = 'gw-tooltip-float visible ' + (above ? 'above' : 'below');
+});
+
+document.addEventListener('mouseout', function(e) {
+  var trigger = e.target.closest('.tooltip-trigger');
+  if (trigger) {
+    tooltipEl.className = 'gw-tooltip-float';
+  }
+});
+
+// Init
+function init() {
+  if (!loadState()) { initDefaults(); }
+  document.getElementById('totalBudget').value = fmtInputNum(state.totalBudget);
+  document.getElementById('primaryKpi').value = state.primaryKpi;
+  document.getElementById('organicBoost').value = state.organicBoost;
+  document.getElementById('organicBoostTarget').value = state.organicBoost;
+  document.getElementById('targetStage').value = state.targetStage;
+  document.getElementById('targetValue').value = fmtInputNum(state.targetValue);
+  document.getElementById('primaryKpiTarget').value = state.primaryKpi;
+  setMode(state.mode);
+  switchPhase(state.activePhase);
+}
+
+init();
+</script>
+</body>
+</html>
