@@ -639,8 +639,8 @@ select.input-field {
       <div class="two-col">
         <div>
           <div class="input-group">
-            <label class="input-label">Target KPI Stage</label>
-            <select id="targetStage" class="input-field" onchange="onTargetStageChange(this)">
+            <label class="input-label">Primary KPI Objective</label>
+            <select id="primaryKpiTarget" class="input-field" onchange="onPrimaryKpiChange(this)">
               <option value="reach">Reach</option>
               <option value="accelerated">Accelerated</option>
               <option value="engaged">Engaged</option>
@@ -657,16 +657,6 @@ select.input-field {
           <div class="input-group">
             <label class="input-label">Organic Boost Multiplier</label>
             <input type="text" id="organicBoostTarget" class="input-field" value="1.48" oninput="onOrganicBoostInput(this)">
-          </div>
-          <div class="input-group">
-            <label class="input-label">Primary KPI Objective</label>
-            <select id="primaryKpiTarget" class="input-field" onchange="onPrimaryKpiChange(this)">
-              <option value="reach">Reach</option>
-              <option value="accelerated">Accelerated</option>
-              <option value="engaged">Engaged</option>
-              <option value="trained">Trained</option>
-              <option value="credentialed" selected>Credentialed</option>
-            </select>
           </div>
         </div>
       </div>
@@ -943,13 +933,19 @@ var BENCHMARK_DEFS = [
   { key: 'trainedToCredentialed', label: 'Trained \u2192 Credentialed', desc: 'Percentage of trained users who earn a credential' }
 ];
 
+// Channel target stages limited to external marketing metrics
+var CHANNEL_STAGES = [
+  { key: 'reach', label: 'Reach' },
+  { key: 'engaged', label: 'Engaged' }
+];
+
 var DEFAULT_CHANNELS = [
-  { name: 'Meta Ads', platform: 'Meta', adType: 'App Install Campaign', budgetPct: 35, cpi: 0.45, targetStage: 'accelerated' },
-  { name: 'Google UAC', platform: 'Google', adType: 'Universal App Campaign', budgetPct: 25, cpi: 0.60, targetStage: 'accelerated' },
-  { name: 'TikTok Ads', platform: 'TikTok', adType: 'App Install', budgetPct: 15, cpi: 0.35, targetStage: 'accelerated' },
-  { name: 'In-App Banners', platform: 'Goodwall', adType: 'Banner / CTA', budgetPct: 10, cpi: 0.05, targetStage: 'engaged' },
-  { name: 'Community Outreach', platform: 'Organic', adType: 'Community', budgetPct: 10, cpi: 0.10, targetStage: 'reach' },
-  { name: 'Influencer Marketing', platform: 'Various', adType: 'Sponsored Content', budgetPct: 5, cpi: 0.80, targetStage: 'reach' }
+  { name: 'Meta Ads', platform: 'Meta', adType: 'App Install Campaign', budgetPct: 30, cpi: 0.45, targetStage: 'reach' },
+  { name: 'Google UAC', platform: 'Google', adType: 'Universal App Campaign', budgetPct: 25, cpi: 0.60, targetStage: 'reach' },
+  { name: 'TikTok Ads', platform: 'TikTok', adType: 'Video Ad', budgetPct: 20, cpi: 0.35, targetStage: 'reach' },
+  { name: 'Community Outreach', platform: 'Organic', adType: 'Community', budgetPct: 10, cpi: 0.10, targetStage: 'engaged' },
+  { name: 'Influencer Marketing', platform: 'Various', adType: 'Sponsored Content', budgetPct: 10, cpi: 0.80, targetStage: 'reach' },
+  { name: 'LinkedIn Ads', platform: 'LinkedIn', adType: 'Sponsored Content', budgetPct: 5, cpi: 2.50, targetStage: 'engaged' }
 ];
 
 var DEFAULT_PARTNERS = [
@@ -1082,40 +1078,42 @@ function calculateKpiToBudget() {
   geographies.forEach(function(g) { totalAlloc += g.allocation; });
   if (totalAlloc === 0) totalAlloc = 1;
 
-  // Compute accelPerDollar: how many accelerated users per $1 of total budget
-  // For each geo: accel_i = (totalBudget * alloc_i/100 / cpi_i) * organicBoost
-  // So total accel = totalBudget * organicBoost * sum(alloc_i/100 / cpi_i)
-  // Therefore: accelPerDollar = organicBoost * sum(alloc_i/100 / cpi_i)
+  // Compute per-dollar yields for each funnel stage
+  // For each geo: accel_i = (budget * alloc_i/100 / cpi_i) * organicBoost
+  // reach_i = accel_i * reachMultiplier_i
+  // So: reachPerDollar = organicBoost * sum(alloc_i/100 * RM_i / cpi_i)
+  //     accelPerDollar = organicBoost * sum(alloc_i/100 / cpi_i)
   var accelPerDollar = 0;
-  var weightedRM = 0;
+  var reachPerDollar = 0;
   geographies.forEach(function(g) {
-    if (g.cpi > 0) accelPerDollar += (g.allocation / 100) / g.cpi;
-    weightedRM += g.reachMultiplier * (g.allocation / totalAlloc);
+    if (g.cpi > 0) {
+      accelPerDollar += (g.allocation / 100) / g.cpi;
+      reachPerDollar += (g.allocation / 100) * g.reachMultiplier / g.cpi;
+    }
   });
   accelPerDollar *= organicBoost;
+  reachPerDollar *= organicBoost;
   if (accelPerDollar === 0) accelPerDollar = organicBoost / 0.50; // fallback
-  if (weightedRM === 0) weightedRM = 100;
+  if (reachPerDollar === 0) reachPerDollar = accelPerDollar * 100;
 
-  var acceleratedNeeded = 0;
+  var requiredBudget = 0;
   switch (targetStage) {
     case 'reach':
-      acceleratedNeeded = weightedRM > 0 ? targetValue / weightedRM : 0;
+      requiredBudget = reachPerDollar > 0 ? targetValue / reachPerDollar : 0;
       break;
     case 'accelerated':
-      acceleratedNeeded = targetValue;
+      requiredBudget = accelPerDollar > 0 ? targetValue / accelPerDollar : 0;
       break;
     case 'engaged':
-      acceleratedNeeded = aToE > 0 ? targetValue / aToE : 0;
+      requiredBudget = (accelPerDollar * aToE) > 0 ? targetValue / (accelPerDollar * aToE) : 0;
       break;
     case 'trained':
-      acceleratedNeeded = (aToE * eToT) > 0 ? targetValue / (aToE * eToT) : 0;
+      requiredBudget = (accelPerDollar * aToE * eToT) > 0 ? targetValue / (accelPerDollar * aToE * eToT) : 0;
       break;
     case 'credentialed':
-      acceleratedNeeded = (aToE * eToT * tToC) > 0 ? targetValue / (aToE * eToT * tToC) : 0;
+      requiredBudget = (accelPerDollar * aToE * eToT * tToC) > 0 ? targetValue / (accelPerDollar * aToE * eToT * tToC) : 0;
       break;
   }
-
-  var requiredBudget = accelPerDollar > 0 ? acceleratedNeeded / accelPerDollar : 0;
   state.requiredBudget = requiredBudget;
 
   var savedBudget = state.totalBudget;
@@ -1294,7 +1292,7 @@ function renderChannelStrategy() {
     var users = ch.cpi > 0 ? cb / ch.cpi : 0;
     totalAlloc += ch.budgetPct;
     var stageOptions = '';
-    STAGES.forEach(function(s) {
+    CHANNEL_STAGES.forEach(function(s) {
       stageOptions += '<option value="' + s.key + '"' + (s.key === ch.targetStage ? ' selected' : '') + '>' + escapeHtml(s.label) + '</option>';
     });
     rows += '<tr>'
@@ -1534,6 +1532,7 @@ function onBudgetInput(el) {
 
 function onPrimaryKpiChange(el) {
   state.primaryKpi = el.value;
+  state.targetStage = el.value;
   document.getElementById('primaryKpi').value = el.value;
   document.getElementById('primaryKpiTarget').value = el.value;
   render();
@@ -1544,14 +1543,6 @@ function onOrganicBoostInput(el) {
   state.organicBoost = parseFloat(el.value) || 1;
   document.getElementById('organicBoost').value = el.value;
   document.getElementById('organicBoostTarget').value = el.value;
-  render();
-  saveState();
-}
-
-function onTargetStageChange(el) {
-  state.targetStage = el.value;
-  state.primaryKpi = el.value;
-  document.getElementById('primaryKpiTarget').value = el.value;
   render();
   saveState();
 }
@@ -1605,7 +1596,7 @@ function updateChannel(id, field, value) {
 }
 
 function addChannel() {
-  state.channels.push({ id: ++channelIdCounter, name: 'New Channel', platform: 'Platform', adType: 'Ad Type', budgetPct: 0, cpi: 0.50, targetStage: 'accelerated' });
+  state.channels.push({ id: ++channelIdCounter, name: 'New Channel', platform: 'Platform', adType: 'Ad Type', budgetPct: 0, cpi: 0.50, targetStage: 'reach' });
   render();
   saveState();
 }
@@ -1719,23 +1710,7 @@ function loadState() {
 function resetState() {
   if (!confirm('Reset all data to defaults?')) return;
   localStorage.removeItem(STORAGE_KEY);
-  geoIdCounter = 0; channelIdCounter = 0; partnerIdCounter = 0;
-  state = {
-    activePhase: 'kpiPlanning', mode: 'budgetToKpi', totalBudget: 150000,
-    primaryKpi: 'accelerated', organicBoost: 1.48, targetStage: 'credentialed',
-    targetValue: 313528, geographies: [], benchmarks: { acceleratedToEngaged: 50, engagedToTrained: 89, trainedToCredentialed: 13 },
-    channels: [], partners: [], results: null, requiredBudget: null
-  };
-  initDefaults();
-  document.getElementById('totalBudget').value = '150,000';
-  document.getElementById('primaryKpi').value = 'accelerated';
-  document.getElementById('organicBoost').value = '1.48';
-  document.getElementById('organicBoostTarget').value = '1.48';
-  document.getElementById('targetStage').value = 'credentialed';
-  document.getElementById('targetValue').value = '313,528';
-  document.getElementById('primaryKpiTarget').value = 'credentialed';
-  setMode('budgetToKpi');
-  switchPhase('kpiPlanning');
+  location.reload();
 }
 
 // CSV Export
@@ -1824,11 +1799,12 @@ document.addEventListener('mouseout', function(e) {
 // Init
 function init() {
   if (!loadState()) { initDefaults(); }
+  // Ensure targetStage always matches primaryKpi
+  state.targetStage = state.primaryKpi;
   document.getElementById('totalBudget').value = fmtInputNum(state.totalBudget);
   document.getElementById('primaryKpi').value = state.primaryKpi;
   document.getElementById('organicBoost').value = state.organicBoost;
   document.getElementById('organicBoostTarget').value = state.organicBoost;
-  document.getElementById('targetStage').value = state.targetStage;
   document.getElementById('targetValue').value = fmtInputNum(state.targetValue);
   document.getElementById('primaryKpiTarget').value = state.primaryKpi;
   setMode(state.mode);
