@@ -663,6 +663,131 @@ select.input-field {
   border-bottom: none;
 }
 
+/* Cost Summary Visual Table */
+.cost-summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.cost-summary-actions {
+  display: flex;
+  gap: 8px;
+}
+.btn-copy {
+  font-family: var(--gw-font);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--gw-radius-sm);
+  border: 1px solid var(--gw-border);
+  background: #fff;
+  color: var(--gw-text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+.btn-copy:hover {
+  background: var(--gw-bg-shade);
+  border-color: var(--gw-text-muted);
+}
+.btn-copy.copied {
+  background: var(--gw-green-light);
+  border-color: var(--gw-green);
+  color: var(--gw-green);
+}
+.cost-summary-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  border: 1px solid var(--gw-border);
+  border-radius: var(--gw-radius-md);
+  overflow: hidden;
+}
+.cost-summary-table thead th {
+  background: var(--gw-bg-dark);
+  color: #fff;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 10px 16px;
+  text-align: left;
+}
+.cost-summary-table thead th:last-child {
+  text-align: right;
+}
+.cost-summary-table tbody td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--gw-bg-shade-2);
+  vertical-align: top;
+}
+.cost-summary-table tbody td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.cost-summary-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.cost-summary-table .cat-row td {
+  background: var(--gw-bg-shade);
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--gw-text-secondary);
+  padding: 8px 16px;
+}
+.cost-summary-table .cat-row td .cat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  margin-right: 8px;
+  font-size: 12px;
+  vertical-align: middle;
+}
+.cost-summary-table .item-row td {
+  padding-left: 28px;
+  color: var(--gw-text-secondary);
+}
+.cost-summary-table .subtotal-row td {
+  font-weight: 600;
+  color: var(--gw-text);
+  background: rgba(0,0,0,0.015);
+  border-bottom: 2px solid var(--gw-border);
+}
+.cost-summary-table .grand-total-row td {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--gw-text);
+  background: var(--gw-green-light);
+  padding: 14px 16px;
+  border-top: 2px solid var(--gw-green);
+}
+.cost-summary-table .grand-total-row td .grand-total-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cost-summary-table .grand-total-row td .grand-total-label i {
+  color: var(--gw-green);
+  font-size: 18px;
+}
+.cost-pct {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--gw-text-muted);
+  margin-left: 8px;
+  font-weight: 400;
+}
+
 @media print {
   .header, .phase-nav, .btn, .next-step { display: none !important; }
   .phase-content { display: block !important; }
@@ -1144,9 +1269,11 @@ select.input-field {
           <div class="card-title">Cost Summary</div>
           <div class="card-subtitle">Complete production budget breakdown</div>
         </div>
+        <div class="cost-summary-actions">
+          <button class="btn-copy" onclick="copySummaryTable()" id="btn-copy-summary"><i class="ph ph-copy"></i> Copy Table</button>
+        </div>
       </div>
-      <div id="summary-cards" class="summary-grid"></div>
-      <div id="summary-breakdown"></div>
+      <div id="summary-table-container"></div>
     </div>
 
     <div class="next-step">
@@ -2132,50 +2259,152 @@ function renderProductionSummary() {
   var mgmt = calcInternalMgmt(creativeTotal);
   var loc = calcLocalisation(creativeTotal);
   var grandTotal = creativeTotal + agencySubtotal + mgmt.total + loc.total;
-  var cards = [
-    { label: 'Creative Assets', value: creativeTotal, color: 'var(--gw-green)' },
-    { label: 'Agency PM', value: agencySubtotal, color: 'var(--gw-blue)' },
-    { label: 'Internal Mgmt', value: mgmt.total, color: 'var(--gw-orange)' },
-    { label: 'Localisation', value: loc.total, color: 'var(--gw-yellow)' },
-    { label: 'Grand Total', value: grandTotal, color: 'var(--gw-green)', highlight: true }
-  ];
-  var cardParts = [];
-  for (var i = 0; i < cards.length; i++) {
-    var cd = cards[i];
-    cardParts.push('<div class="summary-card' + (cd.highlight ? ' highlight' : '') + '"><div class="summary-card-accent" style="background:' + cd.color + '"></div><div class="summary-card-label">' + cd.label + '</div><div class="summary-card-value" style="color:' + cd.color + '">' + fmtCurrencyDecimal(cd.value) + '</div></div>');
+
+  // Helper to calculate percentage of grand total
+  function pctOfTotal(val) {
+    if (grandTotal <= 0) return '';
+    var p = (val / grandTotal * 100).toFixed(1);
+    return '<span class="cost-pct">' + p + '%</span>';
   }
-  setContent('summary-cards', cardParts.join(''));
-  // Breakdown table
-  var b = ['<table class="breakdown-table"><thead><tr><th>Item</th><th style="text-align:right">Amount (USD)</th></tr></thead><tbody>'];
-  b.push('<tr class="section-header"><td colspan="2">Creative Assets</td></tr>');
+
+  // Visual summary table
+  var t = ['<table class="cost-summary-table" id="cost-summary-tbl">'];
+  t.push('<thead><tr><th>Category / Line Item</th><th>Amount (USD)</th></tr></thead><tbody>');
+
+  // Creative Assets section
+  t.push('<tr class="cat-row"><td><span class="cat-icon" style="background:var(--gw-green-light);color:var(--gw-green)"><i class="ph ph-video-camera"></i></span>Creative Assets</td><td>' + fmtCurrencyDecimal(creativeTotal) + pctOfTotal(creativeTotal) + '</td></tr>');
   for (var j = 0; j < state.prodAssets.length; j++) {
     var a = state.prodAssets[j];
     if (a.qty <= 0) continue;
     var costUSD = a.isCustom ? a.costUSD : a.costGBP * state.exchangeRate;
-    b.push('<tr><td>' + escapeHtml(a.name) + ' \u00d7 ' + a.qty + '</td><td style="text-align:right">' + fmtCurrencyDecimal(costUSD * a.qty) + '</td></tr>');
+    t.push('<tr class="item-row"><td>' + escapeHtml(a.name) + ' \u00d7 ' + a.qty + '</td><td>' + fmtCurrencyDecimal(costUSD * a.qty) + '</td></tr>');
   }
-  b.push('<tr class="section-header"><td colspan="2">Agency Project Management</td></tr>');
+
+  // Agency PM section
+  t.push('<tr class="cat-row"><td><span class="cat-icon" style="background:var(--gw-blue-light);color:var(--gw-blue)"><i class="ph ph-users-three"></i></span>Agency Project Management</td><td>' + fmtCurrencyDecimal(agencySubtotal) + pctOfTotal(agencySubtotal) + '</td></tr>');
   if (state.agencyPMOverride !== null) {
-    b.push('<tr><td>Manual override</td><td style="text-align:right">' + fmtCurrencyDecimal(state.agencyPMOverride) + '</td></tr>');
+    t.push('<tr class="item-row"><td>Manual override</td><td>' + fmtCurrencyDecimal(state.agencyPMOverride) + '</td></tr>');
   } else {
-    b.push('<tr><td>PM fee (tiered)</td><td style="text-align:right">' + fmtCurrencyDecimal(pm.totalUSD) + '</td></tr>');
+    t.push('<tr class="item-row"><td>PM fee (tiered)</td><td>' + fmtCurrencyDecimal(pm.totalUSD) + '</td></tr>');
   }
-  if (surcharge > 0) b.push('<tr><td>Revision surcharge (' + state.extraRevisionRounds + ' extra round' + (state.extraRevisionRounds !== 1 ? 's' : '') + ')</td><td style="text-align:right">' + fmtCurrencyDecimal(surcharge) + '</td></tr>');
-  b.push('<tr class="section-header"><td colspan="2">Internal Management</td></tr>');
+  if (surcharge > 0) {
+    t.push('<tr class="item-row"><td>Revision surcharge (' + state.extraRevisionRounds + ' extra round' + (state.extraRevisionRounds !== 1 ? 's' : '') + ')</td><td>' + fmtCurrencyDecimal(surcharge) + '</td></tr>');
+  }
+
+  // Internal Management section
+  t.push('<tr class="cat-row"><td><span class="cat-icon" style="background:var(--gw-orange-light);color:var(--gw-orange)"><i class="ph ph-briefcase"></i></span>Internal Management</td><td>' + fmtCurrencyDecimal(mgmt.total) + pctOfTotal(mgmt.total) + '</td></tr>');
   for (var k = 0; k < mgmt.items.length; k++) {
     var m = mgmt.items[k];
     if (m.pct <= 0) continue;
-    b.push('<tr><td>' + escapeHtml(m.label) + ' (' + fmtPct(m.pct) + ')</td><td style="text-align:right">' + fmtCurrencyDecimal(m.subtotal) + '</td></tr>');
+    t.push('<tr class="item-row"><td>' + escapeHtml(m.label) + ' (' + fmtPct(m.pct) + ')</td><td>' + fmtCurrencyDecimal(m.subtotal) + '</td></tr>');
   }
+
+  // Localisation section
   if (loc.items.length > 0) {
-    b.push('<tr class="section-header"><td colspan="2">Localisation</td></tr>');
+    t.push('<tr class="cat-row"><td><span class="cat-icon" style="background:var(--gw-yellow-light);color:var(--gw-yellow)"><i class="ph ph-globe"></i></span>Localisation</td><td>' + fmtCurrencyDecimal(loc.total) + pctOfTotal(loc.total) + '</td></tr>');
     for (var l = 0; l < loc.items.length; l++) {
       var lc = loc.items[l];
-      b.push('<tr><td>' + escapeHtml(lc.name) + ' (' + fmtPct(lc.pct) + ')</td><td style="text-align:right">' + fmtCurrencyDecimal(lc.cost) + '</td></tr>');
+      t.push('<tr class="item-row"><td>' + escapeHtml(lc.name) + ' (' + fmtPct(lc.pct) + ')</td><td>' + fmtCurrencyDecimal(lc.cost) + '</td></tr>');
     }
   }
-  b.push('<tr class="grand-total"><td>Grand Total</td><td style="text-align:right">' + fmtCurrencyDecimal(grandTotal) + '</td></tr></tbody></table>');
-  setContent('summary-breakdown', b.join(''));
+
+  // Grand total
+  t.push('<tr class="grand-total-row"><td><span class="grand-total-label"><i class="ph-fill ph-check-circle"></i> Grand Total</span></td><td>' + fmtCurrencyDecimal(grandTotal) + '</td></tr>');
+  t.push('</tbody></table>');
+
+  setContent('summary-table-container', t.join(''));
+}
+
+function copySummaryTable() {
+  var creativeTotal = calcCreativeTotal();
+  var pm = calcAgencyPM();
+  var surcharge = calcRevisionSurcharge(creativeTotal);
+  var pmUSD = state.agencyPMOverride !== null ? state.agencyPMOverride : pm.totalUSD;
+  var agencySubtotal = pmUSD + surcharge;
+  var mgmt = calcInternalMgmt(creativeTotal);
+  var loc = calcLocalisation(creativeTotal);
+  var grandTotal = creativeTotal + agencySubtotal + mgmt.total + loc.total;
+  function fmtPlain(n) { return '$' + n.toFixed(2); }
+
+  var lines = [];
+  lines.push('PRODUCTION COST SUMMARY');
+  lines.push('========================');
+  lines.push('');
+  lines.push('Category / Line Item\tAmount (USD)');
+  lines.push('--------------------\t------------');
+
+  // Creative
+  lines.push('');
+  lines.push('CREATIVE ASSETS\t' + fmtPlain(creativeTotal));
+  for (var j = 0; j < state.prodAssets.length; j++) {
+    var a = state.prodAssets[j];
+    if (a.qty <= 0) continue;
+    var costUSD = a.isCustom ? a.costUSD : a.costGBP * state.exchangeRate;
+    lines.push('  ' + a.name + ' x ' + a.qty + '\t' + fmtPlain(costUSD * a.qty));
+  }
+
+  // Agency PM
+  lines.push('');
+  lines.push('AGENCY PROJECT MANAGEMENT\t' + fmtPlain(agencySubtotal));
+  if (state.agencyPMOverride !== null) {
+    lines.push('  Manual override\t' + fmtPlain(state.agencyPMOverride));
+  } else {
+    lines.push('  PM fee (tiered)\t' + fmtPlain(pm.totalUSD));
+  }
+  if (surcharge > 0) {
+    lines.push('  Revision surcharge (' + state.extraRevisionRounds + ' extra round' + (state.extraRevisionRounds !== 1 ? 's' : '') + ')\t' + fmtPlain(surcharge));
+  }
+
+  // Internal Management
+  lines.push('');
+  lines.push('INTERNAL MANAGEMENT\t' + fmtPlain(mgmt.total));
+  for (var k = 0; k < mgmt.items.length; k++) {
+    var m = mgmt.items[k];
+    if (m.pct <= 0) continue;
+    lines.push('  ' + m.label + ' (' + m.pct.toFixed(1) + '%)\t' + fmtPlain(m.subtotal));
+  }
+
+  // Localisation
+  if (loc.items.length > 0) {
+    lines.push('');
+    lines.push('LOCALISATION\t' + fmtPlain(loc.total));
+    for (var l = 0; l < loc.items.length; l++) {
+      var lc = loc.items[l];
+      lines.push('  ' + lc.name + ' (' + lc.pct.toFixed(1) + '%)\t' + fmtPlain(lc.cost));
+    }
+  }
+
+  lines.push('');
+  lines.push('========================');
+  lines.push('GRAND TOTAL\t' + fmtPlain(grandTotal));
+
+  var text = lines.join('\n');
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.getElementById('btn-copy-summary');
+    btn.classList.add('copied');
+    btn.innerHTML = '<i class="ph ph-check"></i> Copied!';
+    setTimeout(function() {
+      btn.classList.remove('copied');
+      btn.innerHTML = '<i class="ph ph-copy"></i> Copy Table';
+    }, 2000);
+  }).catch(function() {
+    // Fallback for older browsers
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    var btn = document.getElementById('btn-copy-summary');
+    btn.classList.add('copied');
+    btn.innerHTML = '<i class="ph ph-check"></i> Copied!';
+    setTimeout(function() {
+      btn.classList.remove('copied');
+      btn.innerHTML = '<i class="ph ph-copy"></i> Copy Table';
+    }, 2000);
+  });
 }
 
 function renderProductionCost() {
