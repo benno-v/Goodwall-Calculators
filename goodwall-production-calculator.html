@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Goodwall Programs - Production Cost Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<style>
+:root {
+  --gw-green: #15C970;
+  --gw-green-dark: #0D2E24;
+  --gw-green-light: rgba(21, 201, 112, 0.10);
+  --gw-orange: #FF8626;
+  --gw-orange-light: rgba(255, 134, 38, 0.10);
+  --gw-yellow: #F4DD2A;
+  --gw-yellow-light: rgba(244, 221, 42, 0.10);
+  --gw-blue: #5796F4;
+  --gw-blue-light: rgba(87, 150, 244, 0.10);
+  --gw-bg-dark: #0B0A11;
+  --gw-bg-dark-shade: #1A191F;
+  --gw-bg-light: #FFFFFF;
+  --gw-bg-shade: #F5F5F4;
+  --gw-bg-shade-2: #E0E0E1;
+  --gw-text: #1A191F;
+  --gw-text-secondary: #3B3841;
+  --gw-text-muted: #6B7280;
+  --gw-border: #E0E0E1;
+  --gw-radius-sm: 8px;
+  --gw-radius-md: 12px;
+  --gw-radius-lg: 16px;
+  --gw-shadow: 0 1px 3px rgba(11, 10, 17, 0.06);
+  --gw-shadow-hover: 0 4px 12px rgba(11, 10, 17, 0.1);
+  --gw-font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--gw-font);
+  background: var(--gw-bg-shade);
+  color: var(--gw-text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.header {
+  background: var(--gw-bg-dark);
+  color: #fff;
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.header-logo-svg {
+  height: 22px;
+  width: auto;
+}
+.header-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255,255,255,0.25);
+}
+.header-title {
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: rgba(255,255,255,0.7);
+}
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+.btn {
+  font-family: var(--gw-font);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: var(--gw-radius-sm);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+.btn-primary {
+  background: var(--gw-green);
+  color: #fff;
+}
+.btn-primary:hover { background: #12b563; }
+.btn-secondary {
+  background: transparent;
+  color: var(--gw-green);
+  border: 1.5px solid var(--gw-green);
+}
+.btn-secondary:hover { background: var(--gw-green-light); }
+.btn-ghost {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.18); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--gw-radius-sm);
+  background: transparent;
+  border: 1px solid var(--gw-border);
+  cursor: pointer;
+  color: var(--gw-text-muted);
+  transition: all 0.15s ease;
+}
+.btn-icon:hover { background: var(--gw-bg-shade); color: var(--gw-text); }
+
+.main { padding: 24px 32px 60px; max-width: 1400px; margin: 0 auto; }
+
+.page-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--gw-text);
+  margin-bottom: 4px;
+}
+.page-description {
+  font-size: 14px;
+  color: var(--gw-text-secondary);
+  margin-bottom: 12px;
+  max-width: 700px;
+}
+.phase-instructions {
+  background: var(--gw-bg-shade);
+  border: 1px solid var(--gw-border);
+  border-radius: var(--gw-radius-md);
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: var(--gw-text-secondary);
+  line-height: 1.6;
+}
+.phase-instructions summary {
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gw-text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+.phase-instructions ol {
+  margin: 10px 0 0 18px;
+  padding: 0;
+}
+.phase-instructions li {
+  margin-bottom: 4px;
+}
+.phase-instructions strong {
+  color: var(--gw-text);
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--gw-border);
+  border-radius: var(--gw-radius-md);
+  padding: 20px 24px;
+  box-shadow: var(--gw-shadow);
+  margin-bottom: 20px;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gw-text-secondary);
+}
+.card-subtitle {
+  font-size: 12px;
+  color: var(--gw-text-muted);
+  font-weight: 400;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.summary-card {
+  background: #fff;
+  border: 1px solid var(--gw-border);
+  border-radius: var(--gw-radius-md);
+  padding: 18px 20px;
+  text-align: center;
+  box-shadow: var(--gw-shadow);
+  position: relative;
+  overflow: hidden;
+}
+.summary-card.highlight {
+  border-color: var(--gw-green);
+  box-shadow: 0 0 0 1px var(--gw-green), var(--gw-shadow);
+}
+.summary-card-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+.summary-card-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--gw-text-muted);
+  margin-bottom: 6px;
+}
+.summary-card-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--gw-text);
+  line-height: 1.1;
+}
+.summary-card-sub {
+  font-size: 12px;
+  color: var(--gw-text-muted);
+  margin-top: 4px;
+}
+
+.input-group { margin-bottom: 14px; }
+.input-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gw-text-secondary);
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.input-field {
+  font-family: var(--gw-font);
+  font-size: 14px;
+  padding: 10px 14px;
+  border: 1px solid var(--gw-border);
+  border-radius: var(--gw-radius-sm);
+  width: 100%;
+  color: var(--gw-text);
+  background: #fff;
+  transition: border-color 0.15s ease;
+}
+.input-field:focus {
+  outline: none;
+  border-color: var(--gw-green);
+  box-shadow: 0 0 0 3px var(--gw-green-light);
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border-radius: var(--gw-radius-sm);
+  border: 1px solid var(--gw-border);
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.data-table thead {
+  background: var(--gw-green-dark);
+  color: #fff;
+}
+.data-table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--gw-border);
+  white-space: nowrap;
+}
+.data-table tbody tr:nth-child(even) { background: var(--gw-bg-shade); }
+.data-table tbody tr:hover { background: var(--gw-green-light); }
+.data-table .input-inline {
+  font-family: var(--gw-font);
+  font-size: 13px;
+  padding: 4px 8px;
+  border: 1px solid var(--gw-border);
+  border-radius: 4px;
+  width: 80px;
+  text-align: right;
+  background: #fff;
+}
+.data-table .input-inline:focus {
+  outline: none;
+  border-color: var(--gw-green);
+  box-shadow: 0 0 0 2px var(--gw-green-light);
+}
+.data-table .total-row {
+  font-weight: 700;
+  background: var(--gw-bg-shade) !important;
+  border-top: 2px solid var(--gw-border);
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.tooltip-trigger {
+  display: inline-flex;
+  align-items: center;
+  cursor: help;
+  color: var(--gw-text-muted);
+  font-size: 14px;
+}
+.tooltip-trigger .tooltip-text {
+  display: none;
+}
+.gw-tooltip-float {
+  position: fixed;
+  z-index: 9999;
+  background: var(--gw-bg-dark);
+  color: #fff;
+  font-family: var(--gw-font);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  padding: 10px 14px;
+  border-radius: var(--gw-radius-sm);
+  width: 280px;
+  white-space: normal;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.gw-tooltip-float.visible { opacity: 1; }
+.gw-tooltip-float::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+}
+.gw-tooltip-float.above::after {
+  top: 100%;
+  border-top-color: var(--gw-bg-dark);
+}
+.gw-tooltip-float.below::after {
+  bottom: 100%;
+  border-bottom-color: var(--gw-bg-dark);
+}
+
+.pm-breakdown {
+  font-size: 13px;
+  color: var(--gw-text-secondary);
+  line-height: 1.8;
+}
+.pm-breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--gw-bg-shade);
+}
+.pm-breakdown-row.total {
+  font-weight: 700;
+  border-top: 2px solid var(--gw-border);
+  border-bottom: none;
+  padding-top: 8px;
+  margin-top: 4px;
+}
+.pm-override-toggle {
+  font-size: 12px;
+  color: var(--gw-text-muted);
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pm-override-toggle input[type="checkbox"] {
+  accent-color: var(--gw-green);
+}
+
+.breakdown-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 16px;
+}
+.breakdown-table th {
+  text-align: left;
+  padding: 8px 14px;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gw-text-muted);
+  border-bottom: 2px solid var(--gw-border);
+}
+.breakdown-table td {
+  padding: 6px 14px;
+  border-bottom: 1px solid var(--gw-bg-shade);
+}
+.breakdown-table .section-header td {
+  font-weight: 700;
+  color: var(--gw-text-secondary);
+  padding-top: 14px;
+  border-bottom: 1px solid var(--gw-border);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.breakdown-table .grand-total td {
+  font-weight: 700;
+  font-size: 15px;
+  padding-top: 12px;
+  border-top: 2px solid var(--gw-text);
+  border-bottom: none;
+}
+
+.mb-12 { margin-bottom: 12px; }
+.mb-20 { margin-bottom: 20px; }
+.mt-16 { margin-top: 16px; }
+.text-muted { color: var(--gw-text-muted); }
+
+@media (max-width: 900px) {
+  .header { padding: 12px 16px; }
+  .main { padding: 16px; }
+  .two-col { grid-template-columns: 1fr; }
+  .summary-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+}
+
+@media print {
+  .header, .btn { display: none !important; }
+  .card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <svg class="header-logo-svg" width="120" height="26" viewBox="0 0 3000 657" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_297_7076)"><g clip-path="url(#clip1_297_7076)"><path fill-rule="evenodd" clip-rule="evenodd" d="M596.796 519.744L471.338 270.81L316.876 354.364L362.068 443.989L421.509 412.118L462.443 493.649L151.454 493.987L307.096 185.148L359.623 289.359L454.771 237.885L356.588 43.122C334.582 -1.01591 275.732 -1.2267 253.515 42.8269L13.4756 519.112C-6.75951 559.245 22.1177 606.84 66.6772 606.84H543.215C587.479 606.84 616.357 559.877 596.754 519.786L596.796 519.744Z" fill="white"/></g><path d="M835.112 150.989V467.438C835.112 496.13 849.47 510.475 866.362 510.475C885.788 510.475 904.369 492.754 904.369 454.78V359.424H866.362V282.632H1022.61V604.145H940.687V546.817L944.076 526.747H938.709L933.676 544.344L932.754 546.942L932.764 546.941C918.939 590.166 878.702 613.427 836.801 613.427C779.369 613.427 716.868 567.015 716.868 458.156V159.427C716.868 54.7881 775.99 5 868.052 5C960.957 5 1022.61 57.3196 1022.61 159.427V253.94H904.369V150.989C904.369 118.078 887.477 107.952 869.741 107.952C852.004 107.952 835.112 118.078 835.112 150.989Z" fill="white"/><path d="M2693.94 604.987V13.1143H2806.27V604.987H2693.94Z" fill="white"/><path d="M2834.98 604.987V13.1143H2947.31V604.987H2834.98Z" fill="white"/><path d="M2078.56 130.384H1966.23L2027.04 604.992H2146.97L2169.78 361.714H2178.22L2200.18 604.992H2320.11L2380.93 130.384H2268.59L2250.86 406.439H2243.26L2212.85 130.384H2135.15L2104.74 406.439H2096.3L2078.56 130.384Z" fill="white"/><path fill-rule="evenodd" clip-rule="evenodd" d="M1356.07 264.617C1356.07 181.074 1405.05 122.004 1496.27 122.004C1587.48 122.004 1639.01 181.918 1639.01 264.617L1639.01 470.814C1639.01 553.512 1587.48 613.427 1496.27 613.427C1405.05 613.427 1356.07 554.356 1356.07 470.814V264.617ZM1468.4 258.71V477.565C1468.4 502.037 1480.22 517.226 1497.96 517.226C1515.69 517.226 1527.52 502.037 1527.52 477.565V258.71C1527.52 232.55 1515.69 218.205 1497.96 218.205C1480.22 218.205 1468.4 232.55 1468.4 258.71Z" fill="white"/><path fill-rule="evenodd" clip-rule="evenodd" d="M1188.62 122.004C1097.4 122.004 1048.41 181.074 1048.41 264.617L1048.41 470.813C1048.41 554.356 1097.4 613.427 1188.62 613.427C1279.83 613.427 1331.35 553.512 1331.35 470.813L1331.35 264.617C1331.35 181.918 1279.83 122.004 1188.62 122.004ZM1160.74 477.564L1160.74 258.71C1160.74 232.55 1172.57 218.205 1190.31 218.205C1208.04 218.205 1219.87 232.55 1219.87 258.71L1219.87 477.564C1219.87 502.036 1208.04 517.226 1190.31 517.226C1172.57 517.226 1160.74 502.036 1160.74 477.564Z" fill="white"/><path fill-rule="evenodd" clip-rule="evenodd" d="M1945.81 604.987H1833.48V559.193L1836.78 539.191H1831.42L1826.38 556.788L1825.49 559.385C1808.56 594.313 1780.89 613.426 1751.56 613.426C1705.1 613.426 1663.72 567.013 1663.72 482.627V230.019C1663.72 157.446 1703.41 122.004 1748.18 122.004C1781.64 122.004 1811.79 141.046 1825.49 174.21L1826.38 176.807L1831.42 194.404H1836.78L1833.48 174.402V13.1143H1945.81V604.987ZM1833.48 488.534V244.364C1828.41 230.019 1816.59 219.892 1803.92 219.892C1787.03 219.892 1776.05 234.238 1776.05 255.335V478.407C1776.05 498.66 1787.03 513.85 1803.08 513.85C1816.59 513.85 1828.41 503.723 1833.48 488.534Z" fill="white"/><path fill-rule="evenodd" clip-rule="evenodd" d="M2555.21 258.201C2555.21 233.729 2544.23 218.54 2527.34 218.54C2510.45 218.54 2498.63 233.729 2498.63 258.201V309.677H2386.29V264.952C2386.29 177.19 2439.5 122.339 2525.65 122.339C2610.96 122.339 2666.7 177.699 2666.7 264.617V604.989H2555.21V568.902L2558.4 549.581H2553.03C2553.03 549.581 2550.18 564.085 2549.23 565.906C2548.28 567.727 2546.47 570.523 2546.47 570.523C2525.29 599.126 2498.61 613.428 2469.06 613.428C2419.23 613.428 2384.6 575.454 2384.6 519.759V423.817C2384.6 368.121 2426.83 330.991 2490.18 330.991H2555.21V258.201ZM2554.79 501.273V386.766H2535.37C2509.18 386.766 2496.51 396.892 2496.51 417.989V496.21C2496.51 514.775 2506.65 526.589 2522.7 526.589C2537.05 526.589 2548.88 517.307 2554.79 501.273Z" fill="white"/></g><defs><clipPath id="clip0_297_7076"><rect width="3000" height="657" fill="white"/></clipPath><clipPath id="clip1_297_7076"><rect width="596.136" height="596.895" fill="white" transform="translate(6.89966 9.90237)"/></clipPath></defs></svg>
+    <span class="header-divider"></span>
+    <span class="header-title">Calculators</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-ghost btn-sm" onclick="exportCSV()"><i class="ph ph-download-simple"></i> Export CSV</button>
+    <button class="btn btn-ghost btn-sm" onclick="resetState()"><i class="ph ph-arrow-counter-clockwise"></i> Reset</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <h2 class="page-title">Production Cost Calculator</h2>
+  <p class="page-description">Estimate creative production costs for a program. Add assets from the rate card, configure management fees, and add localisation costs to see the total production budget.</p>
+
+  <details class="phase-instructions" open>
+    <summary>How to use this calculator</summary>
+    <ol>
+      <li>Set the <strong>GBP to USD exchange rate</strong> if the default (1.26) needs updating. All rate card prices are stored in GBP and converted automatically.</li>
+      <li>In the <strong>Creative Assets</strong> table, set the <strong>quantity</strong> for each asset type you need. Costs are pre-populated from the agency rate card but can be edited. Use <strong>Add Custom Asset</strong> for items not on the rate card.</li>
+      <li>The <strong>Agency Project Management</strong> fee is auto-calculated based on the number of videos, scripts, and banners using the agency's tiered pricing. Toggle manual override to enter a custom amount. Set <strong>Additional Revision Rounds</strong> if you expect to exceed the 3 included rounds (+15% surcharge per round).</li>
+      <li>Set <strong>Internal Management Fees</strong> by entering each role's rate and their allocation as a <strong>percentage of creative cost</strong>.</li>
+      <li>Add <strong>Localisation</strong> countries with the cost as a percentage of the total creative asset cost.</li>
+      <li>Review the <strong>Cost Summary</strong> at the bottom for the full production budget breakdown.</li>
+    </ol>
+  </details>
+
+  <!-- Settings -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Settings</div>
+        <div class="card-subtitle">Configure exchange rate and revision rounds</div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="input-group">
+        <label class="input-label">GBP to USD Exchange Rate <span class="tooltip-trigger" onmouseover="showTooltip(this)" onmouseout="hideTooltip()"><i class="ph ph-info"></i><span class="tooltip-text">All rate card prices are in GBP. This rate converts them to USD. Update when the exchange rate changes.</span></span></label>
+        <input id="input-exchange-rate" type="text" class="input-field" value="1.26" onchange="onExchangeRateChange(this.value)">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Additional Revision Rounds <span class="tooltip-trigger" onmouseover="showTooltip(this)" onmouseout="hideTooltip()"><i class="ph ph-info"></i><span class="tooltip-text">The rate card includes 3 feedback rounds per asset. Each additional round adds a 15% surcharge on the total creative asset cost.</span></span></label>
+        <input id="input-revision-rounds" type="number" class="input-field" value="0" min="0" step="1" onchange="onRevisionRoundsChange(this.value)">
+      </div>
+    </div>
+  </div>
+
+  <!-- Creative Assets -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Creative Assets</div>
+        <div class="card-subtitle">Select asset types and quantities from the rate card. All costs are editable.</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="addCustomAsset()"><i class="ph ph-plus"></i> Add Custom Asset</button>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Asset Type</th>
+            <th>Description</th>
+            <th style="text-align:right">Unit Cost (GBP)</th>
+            <th style="text-align:right">Unit Cost (USD)</th>
+            <th style="text-align:right">Qty</th>
+            <th style="text-align:right">Subtotal (USD)</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="asset-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Agency PM -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Agency Project Management</div>
+        <div class="card-subtitle">Auto-calculated from the agency rate card based on asset counts</div>
+      </div>
+    </div>
+    <div id="agency-pm-content"></div>
+  </div>
+
+  <!-- Internal Management Fees -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Internal Management Fees</div>
+        <div class="card-subtitle">Percentage of creative asset cost allocated to each role</div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th style="text-align:right">Rate (USD) <span class="tooltip-trigger" onmouseover="showTooltip(this)" onmouseout="hideTooltip()" style="color:rgba(255,255,255,0.5)"><i class="ph ph-info"></i><span class="tooltip-text">Informational only. Enter the role's daily or hourly rate for reference. This field is not used in the cost calculation.</span></span></th>
+            <th style="text-align:right">% of Creative Cost</th>
+            <th style="text-align:right">Subtotal (USD)</th>
+          </tr>
+        </thead>
+        <tbody id="mgmt-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Localisation -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Localisation</div>
+        <div class="card-subtitle">Add countries with cost as a percentage of the total creative asset cost</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="addCountry()"><i class="ph ph-plus"></i> Add Country</button>
+    </div>
+    <div id="localisation-content"></div>
+  </div>
+
+  <!-- Cost Summary -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Cost Summary</div>
+        <div class="card-subtitle">Complete production budget breakdown</div>
+      </div>
+    </div>
+    <div id="summary-cards" class="summary-grid"></div>
+    <div id="summary-breakdown"></div>
+  </div>
+
+</div>
+
+<div class="gw-tooltip-float" id="gw-tooltip-el"></div>
+
+<script>
+// ===== Constants =====
+var DEFAULT_ASSETS = [
+  { name: 'Blended Video', desc: 'UGC creator + editorial editing', costGBP: 350, category: 'video', noPM: false },
+  { name: 'Editorial Video + VO', desc: 'B-roll only, no creator', costGBP: 250, category: 'video', noPM: false },
+  { name: 'UGC Video', desc: 'Creator talking only', costGBP: 300, category: 'video', noPM: false },
+  { name: 'Script + Research', desc: 'Script writing and research', costGBP: 75, category: 'script', noPM: false },
+  { name: 'Banner', desc: 'Static graphic / banner', costGBP: 70, category: 'banner', noPM: false },
+  { name: 'Short CTA Video', desc: 'Short call-to-action video (no PM cost)', costGBP: 50, category: 'video', noPM: true }
+];
+
+var PM_VIDEO_TIERS = [
+  { min: 0, max: 0, fee: 0 },
+  { min: 1, max: 1, fee: 250 },
+  { min: 2, max: 2, fee: 500 },
+  { min: 3, max: 3, fee: 750 },
+  { min: 4, max: 4, fee: 1000 },
+  { min: 5, max: 6, fee: 1250 },
+  { min: 7, max: 9, fee: 1500 },
+  { min: 10, max: 12, fee: 1750 },
+  { min: 13, max: 9999, fee: 2000 }
+];
+var PM_PER_SCRIPT = 20;
+var PM_PER_BANNER = 15;
+var REVISION_SURCHARGE_PCT = 15;
+
+var STORAGE_KEY = 'goodwall_production_calculator_v1';
+
+// ===== State =====
+var assetIdCounter = 0;
+var countryIdCounter = 0;
+
+var state = {
+  exchangeRate: 1.26,
+  extraRevisionRounds: 0,
+  assets: [],
+  agencyPMOverride: null,
+  internalRoles: [
+    { id: 1, label: 'Project Manager', rate: 0, pct: 0 },
+    { id: 2, label: 'Program Manager', rate: 0, pct: 0 },
+    { id: 3, label: 'Creative Lead', rate: 0, pct: 0 }
+  ],
+  countries: []
+};
+
+// ===== Utilities =====
+function fmtCurrency(n) {
+  if (n == null || isNaN(n)) return '\u2014';
+  return '$' + Math.round(n).toLocaleString('en-US');
+}
+function fmtCurrencyDecimal(n) {
+  if (n == null || isNaN(n) || !isFinite(n)) return '\u2014';
+  return '$' + n.toFixed(2);
+}
+function fmtGBP(n) {
+  if (n == null || isNaN(n)) return '\u2014';
+  return '\u00a3' + Math.round(n).toLocaleString('en-US');
+}
+function fmtPct(n) {
+  if (n == null || isNaN(n)) return '\u2014';
+  return n.toFixed(1) + '%';
+}
+function parseNumInput(v) {
+  return parseFloat(String(v).replace(/[^0-9.\-]/g, '')) || 0;
+}
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
+}
+function setContent(id, content) {
+  var el = document.getElementById(id);
+  if (el) el.innerHTML = content;
+}
+
+// ===== Tooltip =====
+function showTooltip(triggerEl) {
+  var textEl = triggerEl.querySelector('.tooltip-text');
+  if (!textEl) return;
+  var tip = document.getElementById('gw-tooltip-el');
+  tip.textContent = textEl.textContent;
+  var rect = triggerEl.getBoundingClientRect();
+  var tipW = 280;
+  var left = rect.left + rect.width / 2 - tipW / 2;
+  if (left < 8) left = 8;
+  if (left + tipW > window.innerWidth - 8) left = window.innerWidth - tipW - 8;
+  var above = rect.top > 200;
+  if (above) {
+    tip.style.top = (rect.top - 10) + 'px';
+    tip.style.transform = 'translateY(-100%)';
+    tip.className = 'gw-tooltip-float visible above';
+  } else {
+    tip.style.top = (rect.bottom + 10) + 'px';
+    tip.style.transform = '';
+    tip.className = 'gw-tooltip-float visible below';
+  }
+  tip.style.left = left + 'px';
+}
+function hideTooltip() {
+  var tip = document.getElementById('gw-tooltip-el');
+  tip.className = 'gw-tooltip-float';
+}
+
+// ===== Calculations =====
+function calcCreativeTotal() {
+  var total = 0;
+  for (var i = 0; i < state.assets.length; i++) {
+    var a = state.assets[i];
+    var costUSD = a.isCustom ? a.costUSD : a.costGBP * state.exchangeRate;
+    total += costUSD * (a.qty || 0);
+  }
+  return total;
+}
+
+function calcAgencyPM() {
+  var videoCount = 0;
+  var scriptCount = 0;
+  var bannerCount = 0;
+  for (var i = 0; i < state.assets.length; i++) {
+    var a = state.assets[i];
+    if (a.qty <= 0 || a.isCustom) continue;
+    if (a.category === 'video' && !a.noPM) videoCount += a.qty;
+    else if (a.category === 'script') scriptCount += a.qty;
+    else if (a.category === 'banner') bannerCount += a.qty;
+  }
+  var tierFee = 0;
+  for (var j = 0; j < PM_VIDEO_TIERS.length; j++) {
+    var t = PM_VIDEO_TIERS[j];
+    if (videoCount >= t.min && videoCount <= t.max) {
+      tierFee = t.fee;
+      break;
+    }
+  }
+  var totalGBP = tierFee + (scriptCount * PM_PER_SCRIPT) + (bannerCount * PM_PER_BANNER);
+  return {
+    videoCount: videoCount,
+    scriptCount: scriptCount,
+    bannerCount: bannerCount,
+    tierFee: tierFee,
+    scriptFee: scriptCount * PM_PER_SCRIPT,
+    bannerFee: bannerCount * PM_PER_BANNER,
+    totalGBP: totalGBP,
+    totalUSD: totalGBP * state.exchangeRate
+  };
+}
+
+function calcRevisionSurcharge(creativeTotal) {
+  return creativeTotal * (REVISION_SURCHARGE_PCT / 100) * state.extraRevisionRounds;
+}
+
+function calcInternalMgmt(creativeTotal) {
+  var total = 0;
+  var items = [];
+  for (var i = 0; i < state.internalRoles.length; i++) {
+    var r = state.internalRoles[i];
+    var sub = creativeTotal * (r.pct / 100);
+    items.push({ label: r.label, rate: r.rate, pct: r.pct, subtotal: sub });
+    total += sub;
+  }
+  return { items: items, total: total };
+}
+
+function calcLocalisation(creativeTotal) {
+  var total = 0;
+  var items = [];
+  for (var i = 0; i < state.countries.length; i++) {
+    var c = state.countries[i];
+    var cost = creativeTotal * (c.costPct / 100);
+    items.push({ name: c.name, pct: c.costPct, cost: cost });
+    total += cost;
+  }
+  return { items: items, total: total };
+}
+
+// ===== Rendering =====
+// NOTE: All rendered content is built from state data that originates from
+// the hardcoded DEFAULT_ASSETS constants or user-edited numeric/text fields.
+// escapeHtml() is used on all user-supplied text (asset names, descriptions,
+// country names) before insertion. No external/untrusted data sources exist.
+
+function renderAssetTable() {
+  var rows = [];
+  var totalUSD = 0;
+  for (var i = 0; i < state.assets.length; i++) {
+    var a = state.assets[i];
+    var costUSD = a.isCustom ? a.costUSD : a.costGBP * state.exchangeRate;
+    var subtotal = costUSD * (a.qty || 0);
+    totalUSD += subtotal;
+    if (a.isCustom) {
+      rows.push('<tr>'
+        + '<td><input class="input-inline" style="width:140px;text-align:left" value="' + escapeHtml(a.name) + '" onchange="updateAsset(' + a.id + ',\'name\',this.value)"></td>'
+        + '<td><input class="input-inline" style="width:180px;text-align:left" value="' + escapeHtml(a.desc) + '" onchange="updateAsset(' + a.id + ',\'desc\',this.value)"></td>'
+        + '<td style="text-align:right;color:var(--gw-text-muted)">\u2014</td>'
+        + '<td style="text-align:right">$<input class="input-inline" style="width:70px" value="' + costUSD.toFixed(2) + '" onchange="updateAsset(' + a.id + ',\'costUSD\',this.value)"></td>'
+        + '<td style="text-align:right"><input class="input-inline" style="width:50px" value="' + a.qty + '" onchange="updateAsset(' + a.id + ',\'qty\',this.value)"></td>'
+        + '<td style="text-align:right;font-weight:600">' + fmtCurrencyDecimal(subtotal) + '</td>'
+        + '<td><button class="btn-icon" onclick="removeAsset(' + a.id + ')" title="Remove"><i class="ph ph-x"></i></button></td>'
+        + '</tr>');
+    } else {
+      rows.push('<tr>'
+        + '<td style="font-weight:500">' + escapeHtml(a.name) + '</td>'
+        + '<td style="color:var(--gw-text-muted);font-size:12px">' + escapeHtml(a.desc) + '</td>'
+        + '<td style="text-align:right">\u00a3<input class="input-inline" style="width:60px" value="' + a.costGBP + '" onchange="updateAsset(' + a.id + ',\'costGBP\',this.value)"></td>'
+        + '<td style="text-align:right">' + fmtCurrencyDecimal(costUSD) + '</td>'
+        + '<td style="text-align:right"><input class="input-inline" style="width:50px" value="' + a.qty + '" onchange="updateAsset(' + a.id + ',\'qty\',this.value)"></td>'
+        + '<td style="text-align:right;font-weight:600">' + fmtCurrencyDecimal(subtotal) + '</td>'
+        + '<td></td>'
+        + '</tr>');
+    }
+  }
+  rows.push('<tr class="total-row">'
+    + '<td colspan="5" style="text-align:right">Total Creative Assets</td>'
+    + '<td style="text-align:right">' + fmtCurrencyDecimal(totalUSD) + '</td>'
+    + '<td></td>'
+    + '</tr>');
+  setContent('asset-table-body', rows.join(''));
+}
+
+function renderAgencyPM() {
+  var creativeTotal = calcCreativeTotal();
+  var pm = calcAgencyPM();
+  var surcharge = calcRevisionSurcharge(creativeTotal);
+  var pmUSD = state.agencyPMOverride !== null ? state.agencyPMOverride : pm.totalUSD;
+  var subtotal = pmUSD + surcharge;
+
+  var parts = [];
+  parts.push('<div class="pm-breakdown">');
+
+  if (state.agencyPMOverride !== null) {
+    parts.push('<div class="pm-breakdown-row"><span>Manual Override</span><span>' + fmtCurrencyDecimal(state.agencyPMOverride) + '</span></div>');
+  } else {
+    parts.push('<div class="pm-breakdown-row"><span>Video tier fee (' + pm.videoCount + ' video' + (pm.videoCount !== 1 ? 's' : '') + ')</span><span>' + fmtGBP(pm.tierFee) + ' \u2192 ' + fmtCurrencyDecimal(pm.tierFee * state.exchangeRate) + '</span></div>');
+    if (pm.scriptCount > 0) {
+      parts.push('<div class="pm-breakdown-row"><span>Script PM (' + pm.scriptCount + ' \u00d7 ' + fmtGBP(PM_PER_SCRIPT) + ')</span><span>' + fmtGBP(pm.scriptFee) + ' \u2192 ' + fmtCurrencyDecimal(pm.scriptFee * state.exchangeRate) + '</span></div>');
+    }
+    if (pm.bannerCount > 0) {
+      parts.push('<div class="pm-breakdown-row"><span>Banner PM (' + pm.bannerCount + ' \u00d7 ' + fmtGBP(PM_PER_BANNER) + ')</span><span>' + fmtGBP(pm.bannerFee) + ' \u2192 ' + fmtCurrencyDecimal(pm.bannerFee * state.exchangeRate) + '</span></div>');
+    }
+    parts.push('<div class="pm-breakdown-row" style="font-weight:600"><span>Agency PM Total</span><span>' + fmtCurrencyDecimal(pm.totalUSD) + '</span></div>');
+  }
+
+  if (state.extraRevisionRounds > 0) {
+    parts.push('<div class="pm-breakdown-row" style="color:var(--gw-orange)"><span>Revision surcharge (' + state.extraRevisionRounds + ' round' + (state.extraRevisionRounds !== 1 ? 's' : '') + ' \u00d7 15% of ' + fmtCurrencyDecimal(creativeTotal) + ')</span><span>' + fmtCurrencyDecimal(surcharge) + '</span></div>');
+  }
+
+  parts.push('<div class="pm-breakdown-row total"><span>Agency PM Subtotal</span><span>' + fmtCurrencyDecimal(subtotal) + '</span></div>');
+  parts.push('</div>');
+
+  parts.push('<label class="pm-override-toggle"><input type="checkbox" ' + (state.agencyPMOverride !== null ? 'checked' : '') + ' onchange="togglePMOverride(this.checked)"> Override auto-calculation with manual amount</label>');
+  if (state.agencyPMOverride !== null) {
+    parts.push('<div class="input-group mt-16"><label class="input-label">Manual Agency PM (USD)</label><input type="text" class="input-field" style="max-width:200px" value="' + state.agencyPMOverride.toFixed(2) + '" onchange="updatePMOverride(this.value)"></div>');
+  }
+
+  setContent('agency-pm-content', parts.join(''));
+}
+
+function renderMgmtTable() {
+  var creativeTotal = calcCreativeTotal();
+  var rows = [];
+  var totalMgmt = 0;
+  for (var i = 0; i < state.internalRoles.length; i++) {
+    var r = state.internalRoles[i];
+    var sub = creativeTotal * (r.pct / 100);
+    totalMgmt += sub;
+    rows.push('<tr>'
+      + '<td style="font-weight:500">' + escapeHtml(r.label) + '</td>'
+      + '<td style="text-align:right">$<input class="input-inline" style="width:80px" value="' + r.rate + '" onchange="updateRole(' + r.id + ',\'rate\',this.value)"></td>'
+      + '<td style="text-align:right"><input class="input-inline" style="width:60px" value="' + r.pct + '" onchange="updateRole(' + r.id + ',\'pct\',this.value)">%</td>'
+      + '<td style="text-align:right;font-weight:600">' + fmtCurrencyDecimal(sub) + '</td>'
+      + '</tr>');
+  }
+  rows.push('<tr class="total-row">'
+    + '<td colspan="3" style="text-align:right">Total Internal Management</td>'
+    + '<td style="text-align:right">' + fmtCurrencyDecimal(totalMgmt) + '</td>'
+    + '</tr>');
+  setContent('mgmt-table-body', rows.join(''));
+}
+
+function renderLocalisation() {
+  var creativeTotal = calcCreativeTotal();
+  var parts = [];
+  if (state.countries.length === 0) {
+    parts.push('<p class="text-muted" style="font-size:13px">No localisation countries added. Click "Add Country" to include localisation costs.</p>');
+  } else {
+    parts.push('<div class="table-wrap"><table class="data-table"><thead><tr><th>Country</th><th style="text-align:right">Cost (%)</th><th style="text-align:right">Localisation Cost (USD)</th><th></th></tr></thead><tbody>');
+    var totalLoc = 0;
+    for (var i = 0; i < state.countries.length; i++) {
+      var c = state.countries[i];
+      var cost = creativeTotal * (c.costPct / 100);
+      totalLoc += cost;
+      parts.push('<tr>'
+        + '<td><input class="input-inline" style="width:140px;text-align:left" value="' + escapeHtml(c.name) + '" onchange="updateCountry(' + c.id + ',\'name\',this.value)"></td>'
+        + '<td style="text-align:right"><input class="input-inline" style="width:60px" value="' + c.costPct + '" onchange="updateCountry(' + c.id + ',\'costPct\',this.value)">%</td>'
+        + '<td style="text-align:right;font-weight:600">' + fmtCurrencyDecimal(cost) + '</td>'
+        + '<td><button class="btn-icon" onclick="removeCountry(' + c.id + ')" title="Remove"><i class="ph ph-x"></i></button></td>'
+        + '</tr>');
+    }
+    parts.push('<tr class="total-row"><td colspan="2" style="text-align:right">Total Localisation</td><td style="text-align:right">' + fmtCurrencyDecimal(totalLoc) + '</td><td></td></tr>');
+    parts.push('</tbody></table></div>');
+  }
+  setContent('localisation-content', parts.join(''));
+}
+
+function renderSummary() {
+  var creativeTotal = calcCreativeTotal();
+  var pm = calcAgencyPM();
+  var surcharge = calcRevisionSurcharge(creativeTotal);
+  var pmUSD = state.agencyPMOverride !== null ? state.agencyPMOverride : pm.totalUSD;
+  var agencySubtotal = pmUSD + surcharge;
+  var mgmt = calcInternalMgmt(creativeTotal);
+  var loc = calcLocalisation(creativeTotal);
+  var grandTotal = creativeTotal + agencySubtotal + mgmt.total + loc.total;
+
+  var cards = [
+    { label: 'Creative Assets', value: creativeTotal, color: 'var(--gw-green)' },
+    { label: 'Agency PM', value: agencySubtotal, color: 'var(--gw-blue)' },
+    { label: 'Internal Mgmt', value: mgmt.total, color: 'var(--gw-orange)' },
+    { label: 'Localisation', value: loc.total, color: 'var(--gw-yellow)' },
+    { label: 'Grand Total', value: grandTotal, color: 'var(--gw-green)', highlight: true }
+  ];
+  var cardParts = [];
+  for (var i = 0; i < cards.length; i++) {
+    var cd = cards[i];
+    cardParts.push('<div class="summary-card' + (cd.highlight ? ' highlight' : '') + '">'
+      + '<div class="summary-card-accent" style="background:' + cd.color + '"></div>'
+      + '<div class="summary-card-label">' + cd.label + '</div>'
+      + '<div class="summary-card-value" style="color:' + cd.color + '">' + fmtCurrencyDecimal(cd.value) + '</div>'
+      + '</div>');
+  }
+  setContent('summary-cards', cardParts.join(''));
+
+  // Breakdown table
+  var bParts = [];
+  bParts.push('<table class="breakdown-table"><thead><tr><th>Item</th><th style="text-align:right">Amount (USD)</th></tr></thead><tbody>');
+
+  bParts.push('<tr class="section-header"><td colspan="2">Creative Assets</td></tr>');
+  for (var j = 0; j < state.assets.length; j++) {
+    var a = state.assets[j];
+    if (a.qty <= 0) continue;
+    var costUSD = a.isCustom ? a.costUSD : a.costGBP * state.exchangeRate;
+    bParts.push('<tr><td>' + escapeHtml(a.name) + ' \u00d7 ' + a.qty + '</td><td style="text-align:right">' + fmtCurrencyDecimal(costUSD * a.qty) + '</td></tr>');
+  }
+
+  bParts.push('<tr class="section-header"><td colspan="2">Agency Project Management</td></tr>');
+  if (state.agencyPMOverride !== null) {
+    bParts.push('<tr><td>Manual override</td><td style="text-align:right">' + fmtCurrencyDecimal(state.agencyPMOverride) + '</td></tr>');
+  } else {
+    bParts.push('<tr><td>PM fee (tiered)</td><td style="text-align:right">' + fmtCurrencyDecimal(pm.totalUSD) + '</td></tr>');
+  }
+  if (surcharge > 0) {
+    bParts.push('<tr><td>Revision surcharge (' + state.extraRevisionRounds + ' extra round' + (state.extraRevisionRounds !== 1 ? 's' : '') + ')</td><td style="text-align:right">' + fmtCurrencyDecimal(surcharge) + '</td></tr>');
+  }
+
+  bParts.push('<tr class="section-header"><td colspan="2">Internal Management</td></tr>');
+  for (var k = 0; k < mgmt.items.length; k++) {
+    var m = mgmt.items[k];
+    if (m.pct <= 0) continue;
+    bParts.push('<tr><td>' + escapeHtml(m.label) + ' (' + fmtPct(m.pct) + ')</td><td style="text-align:right">' + fmtCurrencyDecimal(m.subtotal) + '</td></tr>');
+  }
+
+  if (loc.items.length > 0) {
+    bParts.push('<tr class="section-header"><td colspan="2">Localisation</td></tr>');
+    for (var l = 0; l < loc.items.length; l++) {
+      var lc = loc.items[l];
+      bParts.push('<tr><td>' + escapeHtml(lc.name) + ' (' + fmtPct(lc.pct) + ')</td><td style="text-align:right">' + fmtCurrencyDecimal(lc.cost) + '</td></tr>');
+    }
+  }
+
+  bParts.push('<tr class="grand-total"><td>Grand Total</td><td style="text-align:right">' + fmtCurrencyDecimal(grandTotal) + '</td></tr>');
+  bParts.push('</tbody></table>');
+  setContent('summary-breakdown', bParts.join(''));
+}
+
+function renderAll() {
+  renderAssetTable();
+  renderAgencyPM();
+  renderMgmtTable();
+  renderLocalisation();
+  renderSummary();
+}
+
+// ===== Event Handlers =====
+function onExchangeRateChange(val) {
+  state.exchangeRate = parseNumInput(val) || 1.26;
+  renderAll();
+  saveState();
+}
+
+function onRevisionRoundsChange(val) {
+  state.extraRevisionRounds = Math.max(0, Math.round(parseNumInput(val)));
+  renderAll();
+  saveState();
+}
+
+function updateAsset(id, field, value) {
+  for (var i = 0; i < state.assets.length; i++) {
+    if (state.assets[i].id === id) {
+      if (field === 'name' || field === 'desc') {
+        state.assets[i][field] = value;
+      } else if (field === 'qty') {
+        state.assets[i].qty = Math.max(0, Math.round(parseNumInput(value)));
+      } else if (field === 'costGBP') {
+        state.assets[i].costGBP = parseNumInput(value);
+      } else if (field === 'costUSD') {
+        state.assets[i].costUSD = parseNumInput(value);
+      }
+      break;
+    }
+  }
+  renderAll();
+  saveState();
+}
+
+function addCustomAsset() {
+  state.assets.push({
+    id: ++assetIdCounter,
+    name: 'Custom Asset',
+    desc: '',
+    costGBP: 0,
+    costUSD: 0,
+    qty: 1,
+    category: 'custom',
+    noPM: true,
+    isCustom: true
+  });
+  renderAll();
+  saveState();
+}
+
+function removeAsset(id) {
+  state.assets = state.assets.filter(function(a) { return a.id !== id; });
+  renderAll();
+  saveState();
+}
+
+function togglePMOverride(checked) {
+  if (checked) {
+    var pm = calcAgencyPM();
+    state.agencyPMOverride = pm.totalUSD;
+  } else {
+    state.agencyPMOverride = null;
+  }
+  renderAll();
+  saveState();
+}
+
+function updatePMOverride(val) {
+  state.agencyPMOverride = parseNumInput(val);
+  renderAll();
+  saveState();
+}
+
+function updateRole(id, field, value) {
+  for (var i = 0; i < state.internalRoles.length; i++) {
+    if (state.internalRoles[i].id === id) {
+      if (field === 'rate' || field === 'pct') {
+        state.internalRoles[i][field] = parseNumInput(value);
+      }
+      break;
+    }
+  }
+  renderAll();
+  saveState();
+}
+
+function addCountry() {
+  state.countries.push({
+    id: ++countryIdCounter,
+    name: 'New Country',
+    costPct: 10
+  });
+  renderAll();
+  saveState();
+}
+
+function updateCountry(id, field, value) {
+  for (var i = 0; i < state.countries.length; i++) {
+    if (state.countries[i].id === id) {
+      if (field === 'name') {
+        state.countries[i].name = value;
+      } else if (field === 'costPct') {
+        state.countries[i].costPct = parseNumInput(value);
+      }
+      break;
+    }
+  }
+  renderAll();
+  saveState();
+}
+
+function removeCountry(id) {
+  state.countries = state.countries.filter(function(c) { return c.id !== id; });
+  renderAll();
+  saveState();
+}
+
+// ===== Persistence =====
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      exchangeRate: state.exchangeRate,
+      extraRevisionRounds: state.extraRevisionRounds,
+      assets: state.assets,
+      agencyPMOverride: state.agencyPMOverride,
+      internalRoles: state.internalRoles,
+      countries: state.countries
+    }));
+  } catch (e) { /* quota exceeded or private browsing */ }
+}
+
+function loadState() {
+  try {
+    var saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (saved) {
+      state.exchangeRate = saved.exchangeRate || 1.26;
+      state.extraRevisionRounds = saved.extraRevisionRounds || 0;
+      state.assets = saved.assets || [];
+      state.agencyPMOverride = saved.agencyPMOverride !== undefined ? saved.agencyPMOverride : null;
+      state.internalRoles = saved.internalRoles || state.internalRoles;
+      state.countries = saved.countries || [];
+      var maxA = 0, maxC = 0;
+      state.assets.forEach(function(a) { if (a.id > maxA) maxA = a.id; });
+      state.countries.forEach(function(c) { if (c.id > maxC) maxC = c.id; });
+      assetIdCounter = maxA;
+      countryIdCounter = maxC;
+      return true;
+    }
+  } catch (e) { /* corrupted or missing */ }
+  return false;
+}
+
+function resetState() {
+  if (!confirm('Reset all data to defaults?')) return;
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  window.location.href = window.location.href.split('#')[0];
+}
+
+function initDefaults() {
+  state.assets = [];
+  for (var i = 0; i < DEFAULT_ASSETS.length; i++) {
+    var d = DEFAULT_ASSETS[i];
+    state.assets.push({
+      id: ++assetIdCounter,
+      name: d.name,
+      desc: d.desc,
+      costGBP: d.costGBP,
+      costUSD: 0,
+      qty: 0,
+      category: d.category,
+      noPM: d.noPM,
+      isCustom: false
+    });
+  }
+}
+
+// ===== CSV Export =====
+function exportCSV() {
+  var creativeTotal = calcCreativeTotal();
+  var pm = calcAgencyPM();
+  var surcharge = calcRevisionSurcharge(creativeTotal);
+  var pmUSD = state.agencyPMOverride !== null ? state.agencyPMOverride : pm.totalUSD;
+  var agencySubtotal = pmUSD + surcharge;
+  var mgmt = calcInternalMgmt(creativeTotal);
+  var loc = calcLocalisation(creativeTotal);
+  var grandTotal = creativeTotal + agencySubtotal + mgmt.total + loc.total;
+
+  var lines = [];
+  lines.push('Production Cost Calculator');
+  lines.push('Exchange Rate (GBP to USD),' + state.exchangeRate);
+  lines.push('Extra Revision Rounds,' + state.extraRevisionRounds);
+  lines.push('');
+  lines.push('Creative Assets');
+  lines.push('Asset Type,Description,Unit Cost (GBP),Unit Cost (USD),Qty,Subtotal (USD)');
+  for (var i = 0; i < state.assets.length; i++) {
+    var a = state.assets[i];
+    var costUSD = a.isCustom ? a.costUSD : a.costGBP * state.exchangeRate;
+    lines.push('"' + a.name + '","' + a.desc + '",' + (a.isCustom ? '' : a.costGBP) + ',' + costUSD.toFixed(2) + ',' + a.qty + ',' + (costUSD * a.qty).toFixed(2));
+  }
+  lines.push('Total,,,,,' + creativeTotal.toFixed(2));
+  lines.push('');
+  lines.push('Agency Project Management');
+  lines.push('Agency PM,' + pmUSD.toFixed(2));
+  if (surcharge > 0) lines.push('Revision Surcharge,' + surcharge.toFixed(2));
+  lines.push('Agency PM Subtotal,' + agencySubtotal.toFixed(2));
+  lines.push('');
+  lines.push('Internal Management');
+  lines.push('Role,Rate (USD),% of Creative,Subtotal (USD)');
+  for (var j = 0; j < mgmt.items.length; j++) {
+    var m = mgmt.items[j];
+    lines.push('"' + m.label + '",' + m.rate + ',' + m.pct + ',' + m.subtotal.toFixed(2));
+  }
+  lines.push('Total,,,' + mgmt.total.toFixed(2));
+  lines.push('');
+  if (loc.items.length > 0) {
+    lines.push('Localisation');
+    lines.push('Country,Cost %,Cost (USD)');
+    for (var k = 0; k < loc.items.length; k++) {
+      var lc = loc.items[k];
+      lines.push('"' + lc.name + '",' + lc.pct + ',' + lc.cost.toFixed(2));
+    }
+    lines.push('Total,,' + loc.total.toFixed(2));
+    lines.push('');
+  }
+  lines.push('Grand Total,' + grandTotal.toFixed(2));
+
+  var csv = lines.join('\n');
+  var blob = new Blob([csv], { type: 'text/csv' });
+  var url = URL.createObjectURL(blob);
+  var link = document.createElement('a');
+  link.href = url;
+  link.download = 'goodwall-production-cost-' + new Date().toISOString().slice(0, 10) + '.csv';
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+// ===== Init =====
+function init() {
+  if (!loadState()) {
+    initDefaults();
+  }
+  document.getElementById('input-exchange-rate').value = state.exchangeRate;
+  document.getElementById('input-revision-rounds').value = state.extraRevisionRounds;
+  renderAll();
+}
+
+init();
+</script>
+</body>
+</html>
