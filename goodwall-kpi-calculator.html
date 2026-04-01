@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Goodwall Programs - Calculators</title>
+<title>Goodwall Programs - KPI & Production Calculators</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <style>
@@ -596,6 +596,73 @@ select.input-field {
   .funnel-count { width: 90px; }
 }
 
+/* Production Cost phase styles */
+.pm-breakdown {
+  font-size: 13px;
+  color: var(--gw-text-secondary);
+  line-height: 1.8;
+}
+.pm-breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--gw-bg-shade);
+}
+.pm-breakdown-row.total {
+  font-weight: 700;
+  border-top: 2px solid var(--gw-border);
+  border-bottom: none;
+  padding-top: 8px;
+  margin-top: 4px;
+}
+.pm-override-toggle {
+  font-size: 12px;
+  color: var(--gw-text-muted);
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pm-override-toggle input[type="checkbox"] {
+  accent-color: var(--gw-green);
+}
+.breakdown-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 16px;
+}
+.breakdown-table th {
+  text-align: left;
+  padding: 8px 14px;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gw-text-muted);
+  border-bottom: 2px solid var(--gw-border);
+}
+.breakdown-table td {
+  padding: 6px 14px;
+  border-bottom: 1px solid var(--gw-bg-shade);
+}
+.breakdown-table .section-header td {
+  font-weight: 700;
+  color: var(--gw-text-secondary);
+  padding-top: 14px;
+  border-bottom: 1px solid var(--gw-border);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.breakdown-table .grand-total td {
+  font-weight: 700;
+  font-size: 15px;
+  padding-top: 12px;
+  border-top: 2px solid var(--gw-text);
+  border-bottom: none;
+}
+
 @media print {
   .header, .phase-nav, .btn, .next-step { display: none !important; }
   .phase-content { display: block !important; }
@@ -621,6 +688,7 @@ select.input-field {
   <div class="phase-tab active" data-phase="kpiPlanning" onclick="switchPhase('kpiPlanning')">KPI Planning</div>
   <div class="phase-tab" data-phase="channelStrategy" onclick="switchPhase('channelStrategy')">Channel Strategy</div>
   <div class="phase-tab" data-phase="partnerPool" onclick="switchPhase('partnerPool')">Partner Marketing Pool</div>
+  <div class="phase-tab" data-phase="productionCost" onclick="switchPhase('productionCost')">Production Cost</div>
 </div>
 
 <div class="main">
@@ -955,6 +1023,134 @@ select.input-field {
 
     <div class="next-step">
       <button class="btn btn-secondary" onclick="switchPhase('channelStrategy')"><i class="ph ph-arrow-left"></i> Back to Channel Strategy</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-primary" onclick="switchPhase('productionCost')">Continue to Production Cost <i class="ph ph-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- PHASE 4: PRODUCTION COST -->
+  <div id="phase-productionCost" class="phase-content">
+    <p class="phase-description">Estimate creative production costs for a program. Add assets from the rate card, configure management fees, and add localisation costs to see the total production budget.</p>
+
+    <details class="phase-instructions" open>
+      <summary>How to use this calculator</summary>
+      <ol>
+        <li>Set the <strong>GBP to USD exchange rate</strong> if the default (1.26) needs updating. All rate card prices are stored in GBP and converted automatically.</li>
+        <li>In the <strong>Creative Assets</strong> table, set the <strong>quantity</strong> for each asset type you need. Costs are pre-populated from the agency rate card but can be edited. Use <strong>Add Custom Asset</strong> for items not on the rate card.</li>
+        <li>The <strong>Agency Project Management</strong> fee is auto-calculated based on the number of videos, scripts, and banners using the agency's tiered pricing. Toggle manual override to enter a custom amount. Set <strong>Additional Revision Rounds</strong> if you expect to exceed the 3 included rounds (+15% surcharge per round).</li>
+        <li>Set <strong>Internal Management Fees</strong> by entering each role's rate and their allocation as a <strong>percentage of creative cost</strong>.</li>
+        <li>Add <strong>Localisation</strong> countries with the cost as a percentage of the total creative asset cost.</li>
+        <li>Review the <strong>Cost Summary</strong> at the bottom for the full production budget breakdown.</li>
+      </ol>
+    </details>
+
+    <!-- Settings -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Settings</div>
+          <div class="card-subtitle">Configure exchange rate and revision rounds</div>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="input-group">
+          <label class="input-label">GBP to USD Exchange Rate <span class="tooltip-trigger"><i class="ph ph-info"></i><span class="tooltip-text">All rate card prices are in GBP. This rate converts them to USD. Update when the exchange rate changes.</span></span></label>
+          <input id="input-exchange-rate" type="text" class="input-field" value="1.26" onchange="onExchangeRateChange(this.value)">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Additional Revision Rounds <span class="tooltip-trigger"><i class="ph ph-info"></i><span class="tooltip-text">The rate card includes 3 feedback rounds per asset. Each additional round adds a 15% surcharge on the total creative asset cost.</span></span></label>
+          <input id="input-revision-rounds" type="number" class="input-field" value="0" min="0" step="1" onchange="onRevisionRoundsChange(this.value)">
+        </div>
+      </div>
+    </div>
+
+    <!-- Creative Assets -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Creative Assets</div>
+          <div class="card-subtitle">Select asset types and quantities from the rate card. All costs are editable.</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addCustomAsset()"><i class="ph ph-plus"></i> Add Custom Asset</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Asset Type</th>
+              <th>Description</th>
+              <th style="text-align:right">Unit Cost (GBP)</th>
+              <th style="text-align:right">Unit Cost (USD)</th>
+              <th style="text-align:right">Qty</th>
+              <th style="text-align:right">Subtotal (USD)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="asset-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Agency PM -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Agency Project Management</div>
+          <div class="card-subtitle">Auto-calculated from the agency rate card based on asset counts</div>
+        </div>
+      </div>
+      <div id="agency-pm-content"></div>
+    </div>
+
+    <!-- Internal Management Fees -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Internal Management Fees</div>
+          <div class="card-subtitle">Percentage of creative asset cost allocated to each role</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th style="text-align:right">Rate (USD) <span class="tooltip-trigger" style="color:rgba(255,255,255,0.5)"><i class="ph ph-info"></i><span class="tooltip-text">Informational only. Enter the role's daily or hourly rate for reference. This field is not used in the cost calculation.</span></span></th>
+              <th style="text-align:right">% of Creative Cost</th>
+              <th style="text-align:right">Subtotal (USD)</th>
+            </tr>
+          </thead>
+          <tbody id="mgmt-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Localisation -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Localisation</div>
+          <div class="card-subtitle">Add countries with cost as a percentage of the total creative asset cost</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addCountry()"><i class="ph ph-plus"></i> Add Country</button>
+      </div>
+      <div id="localisation-content"></div>
+    </div>
+
+    <!-- Cost Summary -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Cost Summary</div>
+          <div class="card-subtitle">Complete production budget breakdown</div>
+        </div>
+      </div>
+      <div id="summary-cards" class="summary-grid"></div>
+      <div id="summary-breakdown"></div>
+    </div>
+
+    <div class="next-step">
+      <button class="btn btn-secondary" onclick="switchPhase('partnerPool')"><i class="ph ph-arrow-left"></i> Back to Partner Marketing Pool</button>
     </div>
   </div>
 
@@ -1042,6 +1238,30 @@ var DEFAULT_PARTNERS = [
   { name: 'UNDP', budget: 24000, geos: ['Global', 'Kenya', 'South Africa', 'Brazil'], kpiPriority: 'credentialed' }
 ];
 
+// Production Cost constants
+var DEFAULT_PROD_ASSETS = [
+  { name: 'Blended Video', desc: 'UGC creator + editorial editing', costGBP: 350, category: 'video', noPM: false },
+  { name: 'Editorial Video + VO', desc: 'B-roll only, no creator', costGBP: 250, category: 'video', noPM: false },
+  { name: 'UGC Video', desc: 'Creator talking only', costGBP: 300, category: 'video', noPM: false },
+  { name: 'Script + Research', desc: 'Script writing and research', costGBP: 75, category: 'script', noPM: false },
+  { name: 'Banner', desc: 'Static graphic / banner', costGBP: 70, category: 'banner', noPM: false },
+  { name: 'Short CTA Video', desc: 'Short call-to-action video (no PM cost)', costGBP: 50, category: 'video', noPM: true }
+];
+var PM_VIDEO_TIERS = [
+  { min: 0, max: 0, fee: 0 },
+  { min: 1, max: 1, fee: 250 },
+  { min: 2, max: 2, fee: 500 },
+  { min: 3, max: 3, fee: 750 },
+  { min: 4, max: 4, fee: 1000 },
+  { min: 5, max: 6, fee: 1250 },
+  { min: 7, max: 9, fee: 1500 },
+  { min: 10, max: 12, fee: 1750 },
+  { min: 13, max: 9999, fee: 2000 }
+];
+var PM_PER_SCRIPT = 20;
+var PM_PER_BANNER = 15;
+var REVISION_SURCHARGE_PCT = 15;
+
 // State
 var state = {
   activePhase: 'kpiPlanning',
@@ -1056,17 +1276,45 @@ var state = {
   channels: [],
   partners: [],
   results: null,
-  requiredBudget: null
+  requiredBudget: null,
+  // Production Cost state
+  exchangeRate: 1.26,
+  extraRevisionRounds: 0,
+  prodAssets: [],
+  agencyPMOverride: null,
+  internalRoles: [
+    { id: 1, label: 'Project Manager', rate: 0, pct: 0 },
+    { id: 2, label: 'Program Manager', rate: 0, pct: 0 },
+    { id: 3, label: 'Creative Lead', rate: 0, pct: 0 }
+  ],
+  countries: []
 };
 
 var geoIdCounter = 0;
 var channelIdCounter = 0;
 var partnerIdCounter = 0;
+var assetIdCounter = 0;
+var countryIdCounter = 0;
 
 function initDefaults() {
   state.geographies = GEO_PRESETS.map(function(g) { return Object.assign({}, g, { id: ++geoIdCounter }); });
   state.channels = DEFAULT_CHANNELS.map(function(c) { return Object.assign({}, c, { id: ++channelIdCounter }); });
   state.partners = DEFAULT_PARTNERS.map(function(p) { return Object.assign({}, p, { id: ++partnerIdCounter, geos: p.geos.slice() }); });
+  // Production cost defaults
+  assetIdCounter = 0;
+  countryIdCounter = 0;
+  state.prodAssets = DEFAULT_PROD_ASSETS.map(function(d) {
+    return { id: ++assetIdCounter, name: d.name, desc: d.desc, costGBP: d.costGBP, costUSD: 0, qty: 0, category: d.category, noPM: d.noPM, isCustom: false };
+  });
+  state.exchangeRate = 1.26;
+  state.extraRevisionRounds = 0;
+  state.agencyPMOverride = null;
+  state.internalRoles = [
+    { id: 1, label: 'Project Manager', rate: 0, pct: 0 },
+    { id: 2, label: 'Program Manager', rate: 0, pct: 0 },
+    { id: 3, label: 'Creative Lead', rate: 0, pct: 0 }
+  ];
+  state.countries = [];
 }
 
 // Formatting
@@ -1084,6 +1332,10 @@ function fmtCurrencyDecimal(n) {
   if (n == null || isNaN(n) || !isFinite(n)) return '\u2014';
   if (n < 0.01) return '$' + n.toFixed(4);
   return '$' + n.toFixed(2);
+}
+function fmtGBP(n) {
+  if (n == null || isNaN(n)) return '\u2014';
+  return '\u00a3' + Math.round(n).toLocaleString('en-US');
 }
 function fmtPct(n) {
   if (n == null || isNaN(n)) return '\u2014';
@@ -1738,17 +1990,290 @@ document.addEventListener('click', function() {
   document.querySelectorAll('.multi-select-dropdown').forEach(function(d) { d.classList.remove('open'); });
 });
 
+// ===== Production Cost: Calculations =====
+function calcCreativeTotal() {
+  var total = 0;
+  for (var i = 0; i < state.prodAssets.length; i++) {
+    var a = state.prodAssets[i];
+    var costUSD = a.isCustom ? a.costUSD : a.costGBP * state.exchangeRate;
+    total += costUSD * (a.qty || 0);
+  }
+  return total;
+}
+
+function calcAgencyPM() {
+  var videoCount = 0, scriptCount = 0, bannerCount = 0;
+  for (var i = 0; i < state.prodAssets.length; i++) {
+    var a = state.prodAssets[i];
+    if (a.qty <= 0 || a.isCustom) continue;
+    if (a.category === 'video' && !a.noPM) videoCount += a.qty;
+    else if (a.category === 'script') scriptCount += a.qty;
+    else if (a.category === 'banner') bannerCount += a.qty;
+  }
+  var tierFee = 0;
+  for (var j = 0; j < PM_VIDEO_TIERS.length; j++) {
+    var t = PM_VIDEO_TIERS[j];
+    if (videoCount >= t.min && videoCount <= t.max) { tierFee = t.fee; break; }
+  }
+  var totalGBP = tierFee + (scriptCount * PM_PER_SCRIPT) + (bannerCount * PM_PER_BANNER);
+  return { videoCount: videoCount, scriptCount: scriptCount, bannerCount: bannerCount, tierFee: tierFee, scriptFee: scriptCount * PM_PER_SCRIPT, bannerFee: bannerCount * PM_PER_BANNER, totalGBP: totalGBP, totalUSD: totalGBP * state.exchangeRate };
+}
+
+function calcRevisionSurcharge(creativeTotal) {
+  return creativeTotal * (REVISION_SURCHARGE_PCT / 100) * state.extraRevisionRounds;
+}
+
+function calcInternalMgmt(creativeTotal) {
+  var total = 0, items = [];
+  for (var i = 0; i < state.internalRoles.length; i++) {
+    var r = state.internalRoles[i];
+    var sub = creativeTotal * (r.pct / 100);
+    items.push({ label: r.label, rate: r.rate, pct: r.pct, subtotal: sub });
+    total += sub;
+  }
+  return { items: items, total: total };
+}
+
+function calcLocalisation(creativeTotal) {
+  var total = 0, items = [];
+  for (var i = 0; i < state.countries.length; i++) {
+    var c = state.countries[i];
+    var cost = creativeTotal * (c.costPct / 100);
+    items.push({ name: c.name, pct: c.costPct, cost: cost });
+    total += cost;
+  }
+  return { items: items, total: total };
+}
+
+// ===== Production Cost: Rendering =====
+function renderAssetTable() {
+  var rows = [];
+  var totalUSD = 0;
+  for (var i = 0; i < state.prodAssets.length; i++) {
+    var a = state.prodAssets[i];
+    var costUSD = a.isCustom ? a.costUSD : a.costGBP * state.exchangeRate;
+    var subtotal = costUSD * (a.qty || 0);
+    totalUSD += subtotal;
+    if (a.isCustom) {
+      rows.push('<tr><td><input class="input-inline" style="width:140px;text-align:left" value="' + escapeHtml(a.name) + '" onchange="updateAsset(' + a.id + ',\'name\',this.value)"></td><td><input class="input-inline" style="width:180px;text-align:left" value="' + escapeHtml(a.desc) + '" onchange="updateAsset(' + a.id + ',\'desc\',this.value)"></td><td style="text-align:right;color:var(--gw-text-muted)">\u2014</td><td style="text-align:right">$<input class="input-inline" style="width:70px" value="' + costUSD.toFixed(2) + '" onchange="updateAsset(' + a.id + ',\'costUSD\',this.value)"></td><td style="text-align:right"><input class="input-inline" style="width:50px" value="' + a.qty + '" onchange="updateAsset(' + a.id + ',\'qty\',this.value)"></td><td style="text-align:right;font-weight:600">' + fmtCurrencyDecimal(subtotal) + '</td><td><button class="btn-icon" onclick="removeAsset(' + a.id + ')" title="Remove"><i class="ph ph-x"></i></button></td></tr>');
+    } else {
+      rows.push('<tr><td style="font-weight:500">' + escapeHtml(a.name) + '</td><td style="color:var(--gw-text-muted);font-size:12px">' + escapeHtml(a.desc) + '</td><td style="text-align:right">\u00a3<input class="input-inline" style="width:60px" value="' + a.costGBP + '" onchange="updateAsset(' + a.id + ',\'costGBP\',this.value)"></td><td style="text-align:right">' + fmtCurrencyDecimal(costUSD) + '</td><td style="text-align:right"><input class="input-inline" style="width:50px" value="' + a.qty + '" onchange="updateAsset(' + a.id + ',\'qty\',this.value)"></td><td style="text-align:right;font-weight:600">' + fmtCurrencyDecimal(subtotal) + '</td><td></td></tr>');
+    }
+  }
+  rows.push('<tr class="total-row"><td colspan="5" style="text-align:right">Total Creative Assets</td><td style="text-align:right">' + fmtCurrencyDecimal(totalUSD) + '</td><td></td></tr>');
+  setContent('asset-table-body', rows.join(''));
+}
+
+function renderAgencyPM() {
+  var creativeTotal = calcCreativeTotal();
+  var pm = calcAgencyPM();
+  var surcharge = calcRevisionSurcharge(creativeTotal);
+  var pmUSD = state.agencyPMOverride !== null ? state.agencyPMOverride : pm.totalUSD;
+  var subtotal = pmUSD + surcharge;
+  var parts = ['<div class="pm-breakdown">'];
+  if (state.agencyPMOverride !== null) {
+    parts.push('<div class="pm-breakdown-row"><span>Manual Override</span><span>' + fmtCurrencyDecimal(state.agencyPMOverride) + '</span></div>');
+  } else {
+    parts.push('<div class="pm-breakdown-row"><span>Video tier fee (' + pm.videoCount + ' video' + (pm.videoCount !== 1 ? 's' : '') + ')</span><span>' + fmtGBP(pm.tierFee) + ' \u2192 ' + fmtCurrencyDecimal(pm.tierFee * state.exchangeRate) + '</span></div>');
+    if (pm.scriptCount > 0) parts.push('<div class="pm-breakdown-row"><span>Script PM (' + pm.scriptCount + ' \u00d7 ' + fmtGBP(PM_PER_SCRIPT) + ')</span><span>' + fmtGBP(pm.scriptFee) + ' \u2192 ' + fmtCurrencyDecimal(pm.scriptFee * state.exchangeRate) + '</span></div>');
+    if (pm.bannerCount > 0) parts.push('<div class="pm-breakdown-row"><span>Banner PM (' + pm.bannerCount + ' \u00d7 ' + fmtGBP(PM_PER_BANNER) + ')</span><span>' + fmtGBP(pm.bannerFee) + ' \u2192 ' + fmtCurrencyDecimal(pm.bannerFee * state.exchangeRate) + '</span></div>');
+    parts.push('<div class="pm-breakdown-row" style="font-weight:600"><span>Agency PM Total</span><span>' + fmtCurrencyDecimal(pm.totalUSD) + '</span></div>');
+  }
+  if (state.extraRevisionRounds > 0) {
+    parts.push('<div class="pm-breakdown-row" style="color:var(--gw-orange)"><span>Revision surcharge (' + state.extraRevisionRounds + ' round' + (state.extraRevisionRounds !== 1 ? 's' : '') + ' \u00d7 15% of ' + fmtCurrencyDecimal(creativeTotal) + ')</span><span>' + fmtCurrencyDecimal(surcharge) + '</span></div>');
+  }
+  parts.push('<div class="pm-breakdown-row total"><span>Agency PM Subtotal</span><span>' + fmtCurrencyDecimal(subtotal) + '</span></div></div>');
+  parts.push('<label class="pm-override-toggle"><input type="checkbox" ' + (state.agencyPMOverride !== null ? 'checked' : '') + ' onchange="togglePMOverride(this.checked)"> Override auto-calculation with manual amount</label>');
+  if (state.agencyPMOverride !== null) {
+    parts.push('<div class="input-group mt-16"><label class="input-label">Manual Agency PM (USD)</label><input type="text" class="input-field" style="max-width:200px" value="' + state.agencyPMOverride.toFixed(2) + '" onchange="updatePMOverride(this.value)"></div>');
+  }
+  setContent('agency-pm-content', parts.join(''));
+}
+
+function renderMgmtTable() {
+  var creativeTotal = calcCreativeTotal();
+  var rows = [];
+  var totalMgmt = 0;
+  for (var i = 0; i < state.internalRoles.length; i++) {
+    var r = state.internalRoles[i];
+    var sub = creativeTotal * (r.pct / 100);
+    totalMgmt += sub;
+    rows.push('<tr><td style="font-weight:500">' + escapeHtml(r.label) + '</td><td style="text-align:right">$<input class="input-inline" style="width:80px" value="' + r.rate + '" onchange="updateRole(' + r.id + ',\'rate\',this.value)"></td><td style="text-align:right"><input class="input-inline" style="width:60px" value="' + r.pct + '" onchange="updateRole(' + r.id + ',\'pct\',this.value)">%</td><td style="text-align:right;font-weight:600">' + fmtCurrencyDecimal(sub) + '</td></tr>');
+  }
+  rows.push('<tr class="total-row"><td colspan="3" style="text-align:right">Total Internal Management</td><td style="text-align:right">' + fmtCurrencyDecimal(totalMgmt) + '</td></tr>');
+  setContent('mgmt-table-body', rows.join(''));
+}
+
+function renderLocalisationTable() {
+  var creativeTotal = calcCreativeTotal();
+  var parts = [];
+  if (state.countries.length === 0) {
+    parts.push('<p class="text-muted" style="font-size:13px">No localisation countries added. Click "Add Country" to include localisation costs.</p>');
+  } else {
+    parts.push('<div class="table-wrap"><table class="data-table"><thead><tr><th>Country</th><th style="text-align:right">Cost (%)</th><th style="text-align:right">Localisation Cost (USD)</th><th></th></tr></thead><tbody>');
+    var totalLoc = 0;
+    for (var i = 0; i < state.countries.length; i++) {
+      var c = state.countries[i];
+      var cost = creativeTotal * (c.costPct / 100);
+      totalLoc += cost;
+      parts.push('<tr><td><input class="input-inline" style="width:140px;text-align:left" value="' + escapeHtml(c.name) + '" onchange="updateCountry(' + c.id + ',\'name\',this.value)"></td><td style="text-align:right"><input class="input-inline" style="width:60px" value="' + c.costPct + '" onchange="updateCountry(' + c.id + ',\'costPct\',this.value)">%</td><td style="text-align:right;font-weight:600">' + fmtCurrencyDecimal(cost) + '</td><td><button class="btn-icon" onclick="removeCountry(' + c.id + ')" title="Remove"><i class="ph ph-x"></i></button></td></tr>');
+    }
+    parts.push('<tr class="total-row"><td colspan="2" style="text-align:right">Total Localisation</td><td style="text-align:right">' + fmtCurrencyDecimal(totalLoc) + '</td><td></td></tr></tbody></table></div>');
+  }
+  setContent('localisation-content', parts.join(''));
+}
+
+function renderProductionSummary() {
+  var creativeTotal = calcCreativeTotal();
+  var pm = calcAgencyPM();
+  var surcharge = calcRevisionSurcharge(creativeTotal);
+  var pmUSD = state.agencyPMOverride !== null ? state.agencyPMOverride : pm.totalUSD;
+  var agencySubtotal = pmUSD + surcharge;
+  var mgmt = calcInternalMgmt(creativeTotal);
+  var loc = calcLocalisation(creativeTotal);
+  var grandTotal = creativeTotal + agencySubtotal + mgmt.total + loc.total;
+  var cards = [
+    { label: 'Creative Assets', value: creativeTotal, color: 'var(--gw-green)' },
+    { label: 'Agency PM', value: agencySubtotal, color: 'var(--gw-blue)' },
+    { label: 'Internal Mgmt', value: mgmt.total, color: 'var(--gw-orange)' },
+    { label: 'Localisation', value: loc.total, color: 'var(--gw-yellow)' },
+    { label: 'Grand Total', value: grandTotal, color: 'var(--gw-green)', highlight: true }
+  ];
+  var cardParts = [];
+  for (var i = 0; i < cards.length; i++) {
+    var cd = cards[i];
+    cardParts.push('<div class="summary-card' + (cd.highlight ? ' highlight' : '') + '"><div class="summary-card-accent" style="background:' + cd.color + '"></div><div class="summary-card-label">' + cd.label + '</div><div class="summary-card-value" style="color:' + cd.color + '">' + fmtCurrencyDecimal(cd.value) + '</div></div>');
+  }
+  setContent('summary-cards', cardParts.join(''));
+  // Breakdown table
+  var b = ['<table class="breakdown-table"><thead><tr><th>Item</th><th style="text-align:right">Amount (USD)</th></tr></thead><tbody>'];
+  b.push('<tr class="section-header"><td colspan="2">Creative Assets</td></tr>');
+  for (var j = 0; j < state.prodAssets.length; j++) {
+    var a = state.prodAssets[j];
+    if (a.qty <= 0) continue;
+    var costUSD = a.isCustom ? a.costUSD : a.costGBP * state.exchangeRate;
+    b.push('<tr><td>' + escapeHtml(a.name) + ' \u00d7 ' + a.qty + '</td><td style="text-align:right">' + fmtCurrencyDecimal(costUSD * a.qty) + '</td></tr>');
+  }
+  b.push('<tr class="section-header"><td colspan="2">Agency Project Management</td></tr>');
+  if (state.agencyPMOverride !== null) {
+    b.push('<tr><td>Manual override</td><td style="text-align:right">' + fmtCurrencyDecimal(state.agencyPMOverride) + '</td></tr>');
+  } else {
+    b.push('<tr><td>PM fee (tiered)</td><td style="text-align:right">' + fmtCurrencyDecimal(pm.totalUSD) + '</td></tr>');
+  }
+  if (surcharge > 0) b.push('<tr><td>Revision surcharge (' + state.extraRevisionRounds + ' extra round' + (state.extraRevisionRounds !== 1 ? 's' : '') + ')</td><td style="text-align:right">' + fmtCurrencyDecimal(surcharge) + '</td></tr>');
+  b.push('<tr class="section-header"><td colspan="2">Internal Management</td></tr>');
+  for (var k = 0; k < mgmt.items.length; k++) {
+    var m = mgmt.items[k];
+    if (m.pct <= 0) continue;
+    b.push('<tr><td>' + escapeHtml(m.label) + ' (' + fmtPct(m.pct) + ')</td><td style="text-align:right">' + fmtCurrencyDecimal(m.subtotal) + '</td></tr>');
+  }
+  if (loc.items.length > 0) {
+    b.push('<tr class="section-header"><td colspan="2">Localisation</td></tr>');
+    for (var l = 0; l < loc.items.length; l++) {
+      var lc = loc.items[l];
+      b.push('<tr><td>' + escapeHtml(lc.name) + ' (' + fmtPct(lc.pct) + ')</td><td style="text-align:right">' + fmtCurrencyDecimal(lc.cost) + '</td></tr>');
+    }
+  }
+  b.push('<tr class="grand-total"><td>Grand Total</td><td style="text-align:right">' + fmtCurrencyDecimal(grandTotal) + '</td></tr></tbody></table>');
+  setContent('summary-breakdown', b.join(''));
+}
+
+function renderProductionCost() {
+  renderAssetTable();
+  renderAgencyPM();
+  renderMgmtTable();
+  renderLocalisationTable();
+  renderProductionSummary();
+}
+
+// ===== Production Cost: Event Handlers =====
+function onExchangeRateChange(val) {
+  state.exchangeRate = parseNumInput(val) || 1.26;
+  renderProductionCost();
+  saveState();
+}
+function onRevisionRoundsChange(val) {
+  state.extraRevisionRounds = Math.max(0, Math.round(parseNumInput(val)));
+  renderProductionCost();
+  saveState();
+}
+function updateAsset(id, field, value) {
+  for (var i = 0; i < state.prodAssets.length; i++) {
+    if (state.prodAssets[i].id === id) {
+      if (field === 'name' || field === 'desc') state.prodAssets[i][field] = value;
+      else if (field === 'qty') state.prodAssets[i].qty = Math.max(0, Math.round(parseNumInput(value)));
+      else if (field === 'costGBP') state.prodAssets[i].costGBP = parseNumInput(value);
+      else if (field === 'costUSD') state.prodAssets[i].costUSD = parseNumInput(value);
+      break;
+    }
+  }
+  renderProductionCost();
+  saveState();
+}
+function addCustomAsset() {
+  state.prodAssets.push({ id: ++assetIdCounter, name: 'Custom Asset', desc: '', costGBP: 0, costUSD: 0, qty: 1, category: 'custom', noPM: true, isCustom: true });
+  renderProductionCost();
+  saveState();
+}
+function removeAsset(id) {
+  state.prodAssets = state.prodAssets.filter(function(a) { return a.id !== id; });
+  renderProductionCost();
+  saveState();
+}
+function togglePMOverride(checked) {
+  if (checked) { state.agencyPMOverride = calcAgencyPM().totalUSD; } else { state.agencyPMOverride = null; }
+  renderProductionCost();
+  saveState();
+}
+function updatePMOverride(val) {
+  state.agencyPMOverride = parseNumInput(val);
+  renderProductionCost();
+  saveState();
+}
+function updateRole(id, field, value) {
+  for (var i = 0; i < state.internalRoles.length; i++) {
+    if (state.internalRoles[i].id === id) {
+      if (field === 'rate' || field === 'pct') state.internalRoles[i][field] = parseNumInput(value);
+      break;
+    }
+  }
+  renderProductionCost();
+  saveState();
+}
+function addCountry() {
+  state.countries.push({ id: ++countryIdCounter, name: 'New Country', costPct: 10 });
+  renderProductionCost();
+  saveState();
+}
+function updateCountry(id, field, value) {
+  for (var i = 0; i < state.countries.length; i++) {
+    if (state.countries[i].id === id) {
+      if (field === 'name') state.countries[i].name = value;
+      else if (field === 'costPct') state.countries[i].costPct = parseNumInput(value);
+      break;
+    }
+  }
+  renderProductionCost();
+  saveState();
+}
+function removeCountry(id) {
+  state.countries = state.countries.filter(function(c) { return c.id !== id; });
+  renderProductionCost();
+  saveState();
+}
+
 // Render dispatch
 function render() {
   switch (state.activePhase) {
     case 'kpiPlanning': renderKpiPlanning(); break;
     case 'channelStrategy': renderChannelStrategy(); break;
     case 'partnerPool': renderPartnerPool(); break;
+    case 'productionCost': renderProductionCost(); break;
   }
 }
 
 // Persistence
-var STORAGE_KEY = 'goodwall_kpi_calculator_v2';
+var STORAGE_KEY = 'goodwall_calculators_v3';
 
 function saveState() {
   try {
@@ -1756,7 +2281,10 @@ function saveState() {
       mode: state.mode, totalBudget: state.totalBudget, primaryKpi: state.primaryKpi,
       organicBoost: state.organicBoost, targetStage: state.targetStage, targetValue: state.targetValue,
       geographies: state.geographies, benchmarks: state.benchmarks, channels: state.channels,
-      partners: state.partners, activePhase: state.activePhase
+      partners: state.partners, activePhase: state.activePhase,
+      exchangeRate: state.exchangeRate, extraRevisionRounds: state.extraRevisionRounds,
+      prodAssets: state.prodAssets, agencyPMOverride: state.agencyPMOverride,
+      internalRoles: state.internalRoles, countries: state.countries
     }));
   } catch (e) { /* quota exceeded or private browsing */ }
 }
@@ -1773,6 +2301,12 @@ function loadState() {
       geoIdCounter = maxGeo + 1;
       channelIdCounter = maxCh + 1;
       partnerIdCounter = maxP + 1;
+      // Production ID counters
+      var maxA = 0, maxCo = 0;
+      if (state.prodAssets) state.prodAssets.forEach(function(a) { if (a.id > maxA) maxA = a.id; });
+      if (state.countries) state.countries.forEach(function(c) { if (c.id > maxCo) maxCo = c.id; });
+      assetIdCounter = maxA;
+      countryIdCounter = maxCo;
       return true;
     }
   } catch (e) { /* corrupted or missing */ }
@@ -1824,6 +2358,33 @@ function exportCSV() {
     state.partners.forEach(function(p) {
       csv += p.name + ',' + p.budget + ',"' + p.geos.join(', ') + '",' + p.kpiPriority + '\n';
     });
+  } else if (phase === 'productionCost') {
+    var ct = calcCreativeTotal();
+    var pmCalc = calcAgencyPM();
+    var surch = calcRevisionSurcharge(ct);
+    var pmVal = state.agencyPMOverride !== null ? state.agencyPMOverride : pmCalc.totalUSD;
+    var agSub = pmVal + surch;
+    var mgmtCalc = calcInternalMgmt(ct);
+    var locCalc = calcLocalisation(ct);
+    var gt = ct + agSub + mgmtCalc.total + locCalc.total;
+    csv += 'Production Cost Calculator\n';
+    csv += 'Exchange Rate (GBP to USD),' + state.exchangeRate + '\nExtra Revision Rounds,' + state.extraRevisionRounds + '\n\n';
+    csv += 'Creative Assets\nAsset Type,Description,Unit Cost (GBP),Unit Cost (USD),Qty,Subtotal (USD)\n';
+    state.prodAssets.forEach(function(a) {
+      var cu = a.isCustom ? a.costUSD : a.costGBP * state.exchangeRate;
+      csv += '"' + a.name + '","' + a.desc + '",' + (a.isCustom ? '' : a.costGBP) + ',' + cu.toFixed(2) + ',' + a.qty + ',' + (cu * a.qty).toFixed(2) + '\n';
+    });
+    csv += 'Total,,,,,' + ct.toFixed(2) + '\n\nAgency PM,' + pmVal.toFixed(2) + '\n';
+    if (surch > 0) csv += 'Revision Surcharge,' + surch.toFixed(2) + '\n';
+    csv += 'Agency PM Subtotal,' + agSub.toFixed(2) + '\n\nInternal Management\nRole,Rate (USD),% of Creative,Subtotal (USD)\n';
+    mgmtCalc.items.forEach(function(m) { csv += '"' + m.label + '",' + m.rate + ',' + m.pct + ',' + m.subtotal.toFixed(2) + '\n'; });
+    csv += 'Total,,,' + mgmtCalc.total.toFixed(2) + '\n\n';
+    if (locCalc.items.length > 0) {
+      csv += 'Localisation\nCountry,Cost %,Cost (USD)\n';
+      locCalc.items.forEach(function(lc) { csv += '"' + lc.name + '",' + lc.pct + ',' + lc.cost.toFixed(2) + '\n'; });
+      csv += 'Total,,' + locCalc.total.toFixed(2) + '\n\n';
+    }
+    csv += 'Grand Total,' + gt.toFixed(2) + '\n';
   }
 
   var blob = new Blob([csv], { type: 'text/csv' });
@@ -1871,6 +2432,21 @@ document.addEventListener('mouseout', function(e) {
 // Init
 function init() {
   if (!loadState()) { initDefaults(); }
+  // Populate default production assets if missing (e.g. old saved state)
+  if (!state.prodAssets || state.prodAssets.length === 0) {
+    state.prodAssets = DEFAULT_PROD_ASSETS.map(function(d) {
+      return { id: ++assetIdCounter, name: d.name, desc: d.desc, costGBP: d.costGBP, costUSD: 0, qty: 0, category: d.category, noPM: d.noPM, isCustom: false };
+    });
+  }
+  if (!state.internalRoles || state.internalRoles.length === 0) {
+    state.internalRoles = [
+      { id: 1, label: 'Project Manager', rate: 0, pct: 0 },
+      { id: 2, label: 'Program Manager', rate: 0, pct: 0 },
+      { id: 3, label: 'Creative Lead', rate: 0, pct: 0 }
+    ];
+  }
+  if (!state.countries) state.countries = [];
+  if (!state.exchangeRate) state.exchangeRate = 1.26;
   // Ensure targetStage always matches primaryKpi
   state.targetStage = state.primaryKpi;
   document.getElementById('totalBudget').value = fmtInputNum(state.totalBudget);
@@ -1879,6 +2455,9 @@ function init() {
   document.getElementById('organicBoostTarget').value = state.organicBoost;
   document.getElementById('targetValue').value = fmtInputNum(state.targetValue);
   document.getElementById('primaryKpiTarget').value = state.primaryKpi;
+  // Production fields
+  document.getElementById('input-exchange-rate').value = state.exchangeRate;
+  document.getElementById('input-revision-rounds').value = state.extraRevisionRounds || 0;
   setMode(state.mode);
   switchPhase(state.activePhase);
 }
