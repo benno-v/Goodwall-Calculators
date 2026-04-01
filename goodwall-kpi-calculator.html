@@ -788,6 +788,37 @@ select.input-field {
   font-weight: 400;
 }
 
+/* Currency Converter */
+.currency-converter {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.currency-converter .input-group {
+  flex: 0 0 auto;
+}
+.currency-converter .conv-arrow {
+  display: flex;
+  align-items: center;
+  padding-bottom: 8px;
+  color: var(--gw-text-muted);
+  font-size: 20px;
+}
+.currency-converter .conv-preview {
+  display: flex;
+  align-items: center;
+  padding-bottom: 8px;
+  font-size: 13px;
+  color: var(--gw-text-muted);
+  gap: 6px;
+}
+.currency-converter .conv-preview .conv-result {
+  font-weight: 700;
+  color: var(--gw-green);
+  font-size: 14px;
+}
+
 @media print {
   .header, .phase-nav, .btn, .next-step { display: none !important; }
   .phase-content { display: block !important; }
@@ -1160,7 +1191,7 @@ select.input-field {
     <details class="phase-instructions" open>
       <summary>How to use this calculator</summary>
       <ol>
-        <li>Set the <strong>GBP to USD exchange rate</strong> if the default (1.26) needs updating. All rate card prices are stored in GBP and converted automatically.</li>
+        <li>Use the <strong>Currency Converter</strong> to set the source currency and exchange rate. All rate card prices are converted to USD automatically. You can also edit USD costs directly in the table.</li>
         <li>In the <strong>Creative Assets</strong> table, set the <strong>quantity</strong> for each asset type you need. Costs are pre-populated from the agency rate card but can be edited. Use <strong>Add Custom Asset</strong> for items not on the rate card.</li>
         <li>The <strong>Agency Project Management</strong> fee is auto-calculated based on the number of videos, scripts, and banners using the agency's tiered pricing. Toggle manual override to enter a custom amount. Set <strong>Additional Revision Rounds</strong> if you expect to exceed the 3 included rounds (+15% surcharge per round).</li>
         <li>Set <strong>Internal Management Fees</strong> by entering each role's rate and their allocation as a <strong>percentage of creative cost</strong>.</li>
@@ -1169,23 +1200,28 @@ select.input-field {
       </ol>
     </details>
 
+    <!-- Currency Converter -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title"><i class="ph ph-currency-circle-dollar" style="color:var(--gw-green)"></i> Currency Converter</div>
+          <div class="card-subtitle">Convert rate card prices from a source currency to USD. Updating the rate recalculates all non-custom asset costs.</div>
+        </div>
+      </div>
+      <div id="currency-converter-content"></div>
+    </div>
+
     <!-- Settings -->
     <div class="card">
       <div class="card-header">
         <div>
           <div class="card-title">Settings</div>
-          <div class="card-subtitle">Configure exchange rate and revision rounds</div>
+          <div class="card-subtitle">Configure additional revision rounds</div>
         </div>
       </div>
-      <div class="two-col">
-        <div class="input-group">
-          <label class="input-label">GBP to USD Exchange Rate <span class="tooltip-trigger"><i class="ph ph-info"></i><span class="tooltip-text">All rate card prices are in GBP. This rate converts them to USD. Update when the exchange rate changes.</span></span></label>
-          <input id="input-exchange-rate" type="text" class="input-field" value="1.26" onchange="onExchangeRateChange(this.value)">
-        </div>
-        <div class="input-group">
-          <label class="input-label">Additional Revision Rounds <span class="tooltip-trigger"><i class="ph ph-info"></i><span class="tooltip-text">The rate card includes 3 feedback rounds per asset. Each additional round adds a 15% surcharge on the total creative asset cost.</span></span></label>
-          <input id="input-revision-rounds" type="number" class="input-field" value="0" min="0" step="1" onchange="onRevisionRoundsChange(this.value)">
-        </div>
+      <div class="input-group" style="max-width:340px">
+        <label class="input-label">Additional Revision Rounds <span class="tooltip-trigger"><i class="ph ph-info"></i><span class="tooltip-text">The rate card includes 3 feedback rounds per asset. Each additional round adds a 15% surcharge on the total creative asset cost.</span></span></label>
+        <input id="input-revision-rounds" type="number" class="input-field" value="0" min="0" step="1" onchange="onRevisionRoundsChange(this.value)">
       </div>
     </div>
 
@@ -1204,7 +1240,6 @@ select.input-field {
             <tr>
               <th>Asset Type</th>
               <th>Description</th>
-              <th style="text-align:right">Unit Cost (GBP)</th>
               <th style="text-align:right">Unit Cost (USD)</th>
               <th style="text-align:right">Qty</th>
               <th style="text-align:right">Subtotal (USD)</th>
@@ -1405,6 +1440,7 @@ var state = {
   results: null,
   requiredBudget: null,
   // Production Cost state
+  sourceCurrency: 'GBP',
   exchangeRate: 1.26,
   extraRevisionRounds: 0,
   prodAssets: [],
@@ -1433,6 +1469,7 @@ function initDefaults() {
   state.prodAssets = DEFAULT_PROD_ASSETS.map(function(d) {
     return { id: ++assetIdCounter, name: d.name, desc: d.desc, costGBP: d.costGBP, costUSD: 0, qty: 0, category: d.category, noPM: d.noPM, isCustom: false };
   });
+  state.sourceCurrency = 'GBP';
   state.exchangeRate = 1.26;
   state.extraRevisionRounds = 0;
   state.agencyPMOverride = null;
@@ -2173,6 +2210,17 @@ function calcLocalisation(creativeTotal) {
 }
 
 // ===== Production Cost: Rendering =====
+function renderCurrencyConverter() {
+  var preview = (1 * state.exchangeRate).toFixed(2);
+  var h = '<div class="currency-converter">';
+  h += '<div class="input-group"><label class="input-label">Source Currency</label><input id="input-source-currency" type="text" class="input-field" style="width:100px;text-transform:uppercase" value="' + escapeHtml(state.sourceCurrency) + '" onchange="onSourceCurrencyChange(this.value)"></div>';
+  h += '<div class="input-group"><label class="input-label">' + escapeHtml(state.sourceCurrency) + ' to USD Rate</label><input id="input-exchange-rate" type="text" class="input-field" style="width:120px" value="' + state.exchangeRate + '" onchange="onExchangeRateChange(this.value)"></div>';
+  h += '<div class="conv-arrow"><i class="ph ph-arrow-right"></i></div>';
+  h += '<div class="conv-preview">1 ' + escapeHtml(state.sourceCurrency) + ' = <span class="conv-result">$' + preview + ' USD</span></div>';
+  h += '</div>';
+  setContent('currency-converter-content', h);
+}
+
 function renderAssetTable() {
   var rows = [];
   var totalUSD = 0;
@@ -2182,12 +2230,12 @@ function renderAssetTable() {
     var subtotal = costUSD * (a.qty || 0);
     totalUSD += subtotal;
     if (a.isCustom) {
-      rows.push('<tr><td><input class="input-inline" style="width:140px;text-align:left" value="' + escapeHtml(a.name) + '" onchange="updateAsset(' + a.id + ',\'name\',this.value)"></td><td><input class="input-inline" style="width:180px;text-align:left" value="' + escapeHtml(a.desc) + '" onchange="updateAsset(' + a.id + ',\'desc\',this.value)"></td><td style="text-align:right;color:var(--gw-text-muted)">\u2014</td><td style="text-align:right">$<input class="input-inline" style="width:70px" value="' + costUSD.toFixed(2) + '" onchange="updateAsset(' + a.id + ',\'costUSD\',this.value)"></td><td style="text-align:right"><input class="input-inline" style="width:50px" value="' + a.qty + '" onchange="updateAsset(' + a.id + ',\'qty\',this.value)"></td><td style="text-align:right;font-weight:600">' + fmtCurrencyDecimal(subtotal) + '</td><td><button class="btn-icon" onclick="removeAsset(' + a.id + ')" title="Remove"><i class="ph ph-x"></i></button></td></tr>');
+      rows.push('<tr><td><input class="input-inline" style="width:140px;text-align:left" value="' + escapeHtml(a.name) + '" onchange="updateAsset(' + a.id + ',\'name\',this.value)"></td><td><input class="input-inline" style="width:180px;text-align:left" value="' + escapeHtml(a.desc) + '" onchange="updateAsset(' + a.id + ',\'desc\',this.value)"></td><td style="text-align:right">$<input class="input-inline" style="width:70px" value="' + costUSD.toFixed(2) + '" onchange="updateAsset(' + a.id + ',\'costUSD\',this.value)"></td><td style="text-align:right"><input class="input-inline" style="width:50px" value="' + a.qty + '" onchange="updateAsset(' + a.id + ',\'qty\',this.value)"></td><td style="text-align:right;font-weight:600">' + fmtCurrencyDecimal(subtotal) + '</td><td><button class="btn-icon" onclick="removeAsset(' + a.id + ')" title="Remove"><i class="ph ph-x"></i></button></td></tr>');
     } else {
-      rows.push('<tr><td style="font-weight:500">' + escapeHtml(a.name) + '</td><td style="color:var(--gw-text-muted);font-size:12px">' + escapeHtml(a.desc) + '</td><td style="text-align:right">\u00a3<input class="input-inline" style="width:60px" value="' + a.costGBP + '" onchange="updateAsset(' + a.id + ',\'costGBP\',this.value)"></td><td style="text-align:right">' + fmtCurrencyDecimal(costUSD) + '</td><td style="text-align:right"><input class="input-inline" style="width:50px" value="' + a.qty + '" onchange="updateAsset(' + a.id + ',\'qty\',this.value)"></td><td style="text-align:right;font-weight:600">' + fmtCurrencyDecimal(subtotal) + '</td><td></td></tr>');
+      rows.push('<tr><td style="font-weight:500">' + escapeHtml(a.name) + '</td><td style="color:var(--gw-text-muted);font-size:12px">' + escapeHtml(a.desc) + '</td><td style="text-align:right">$<input class="input-inline" style="width:70px" value="' + costUSD.toFixed(2) + '" onchange="updateAsset(' + a.id + ',\'costUSD\',this.value)"></td><td style="text-align:right"><input class="input-inline" style="width:50px" value="' + a.qty + '" onchange="updateAsset(' + a.id + ',\'qty\',this.value)"></td><td style="text-align:right;font-weight:600">' + fmtCurrencyDecimal(subtotal) + '</td><td></td></tr>');
     }
   }
-  rows.push('<tr class="total-row"><td colspan="5" style="text-align:right">Total Creative Assets</td><td style="text-align:right">' + fmtCurrencyDecimal(totalUSD) + '</td><td></td></tr>');
+  rows.push('<tr class="total-row"><td colspan="4" style="text-align:right">Total Creative Assets</td><td style="text-align:right">' + fmtCurrencyDecimal(totalUSD) + '</td><td></td></tr>');
   setContent('asset-table-body', rows.join(''));
 }
 
@@ -2201,9 +2249,9 @@ function renderAgencyPM() {
   if (state.agencyPMOverride !== null) {
     parts.push('<div class="pm-breakdown-row"><span>Manual Override</span><span>' + fmtCurrencyDecimal(state.agencyPMOverride) + '</span></div>');
   } else {
-    parts.push('<div class="pm-breakdown-row"><span>Video tier fee (' + pm.videoCount + ' video' + (pm.videoCount !== 1 ? 's' : '') + ')</span><span>' + fmtGBP(pm.tierFee) + ' \u2192 ' + fmtCurrencyDecimal(pm.tierFee * state.exchangeRate) + '</span></div>');
-    if (pm.scriptCount > 0) parts.push('<div class="pm-breakdown-row"><span>Script PM (' + pm.scriptCount + ' \u00d7 ' + fmtGBP(PM_PER_SCRIPT) + ')</span><span>' + fmtGBP(pm.scriptFee) + ' \u2192 ' + fmtCurrencyDecimal(pm.scriptFee * state.exchangeRate) + '</span></div>');
-    if (pm.bannerCount > 0) parts.push('<div class="pm-breakdown-row"><span>Banner PM (' + pm.bannerCount + ' \u00d7 ' + fmtGBP(PM_PER_BANNER) + ')</span><span>' + fmtGBP(pm.bannerFee) + ' \u2192 ' + fmtCurrencyDecimal(pm.bannerFee * state.exchangeRate) + '</span></div>');
+    parts.push('<div class="pm-breakdown-row"><span>Video tier fee (' + pm.videoCount + ' video' + (pm.videoCount !== 1 ? 's' : '') + ')</span><span>' + fmtCurrencyDecimal(pm.tierFee * state.exchangeRate) + '</span></div>');
+    if (pm.scriptCount > 0) parts.push('<div class="pm-breakdown-row"><span>Script PM (' + pm.scriptCount + ' scripts)</span><span>' + fmtCurrencyDecimal(pm.scriptFee * state.exchangeRate) + '</span></div>');
+    if (pm.bannerCount > 0) parts.push('<div class="pm-breakdown-row"><span>Banner PM (' + pm.bannerCount + ' banners)</span><span>' + fmtCurrencyDecimal(pm.bannerFee * state.exchangeRate) + '</span></div>');
     parts.push('<div class="pm-breakdown-row" style="font-weight:600"><span>Agency PM Total</span><span>' + fmtCurrencyDecimal(pm.totalUSD) + '</span></div>');
   }
   if (state.extraRevisionRounds > 0) {
@@ -2408,6 +2456,7 @@ function copySummaryTable() {
 }
 
 function renderProductionCost() {
+  renderCurrencyConverter();
   renderAssetTable();
   renderAgencyPM();
   renderMgmtTable();
@@ -2416,6 +2465,11 @@ function renderProductionCost() {
 }
 
 // ===== Production Cost: Event Handlers =====
+function onSourceCurrencyChange(val) {
+  state.sourceCurrency = val.trim().toUpperCase() || 'GBP';
+  renderProductionCost();
+  saveState();
+}
 function onExchangeRateChange(val) {
   state.exchangeRate = parseNumInput(val) || 1.26;
   renderProductionCost();
@@ -2429,10 +2483,14 @@ function onRevisionRoundsChange(val) {
 function updateAsset(id, field, value) {
   for (var i = 0; i < state.prodAssets.length; i++) {
     if (state.prodAssets[i].id === id) {
-      if (field === 'name' || field === 'desc') state.prodAssets[i][field] = value;
-      else if (field === 'qty') state.prodAssets[i].qty = Math.max(0, Math.round(parseNumInput(value)));
-      else if (field === 'costGBP') state.prodAssets[i].costGBP = parseNumInput(value);
-      else if (field === 'costUSD') state.prodAssets[i].costUSD = parseNumInput(value);
+      var a = state.prodAssets[i];
+      if (field === 'name' || field === 'desc') a[field] = value;
+      else if (field === 'qty') a.qty = Math.max(0, Math.round(parseNumInput(value)));
+      else if (field === 'costUSD') {
+        var usd = parseNumInput(value);
+        if (a.isCustom) { a.costUSD = usd; }
+        else { a.costGBP = state.exchangeRate > 0 ? usd / state.exchangeRate : 0; }
+      }
       break;
     }
   }
@@ -2511,7 +2569,7 @@ function saveState() {
       organicBoost: state.organicBoost, targetStage: state.targetStage, targetValue: state.targetValue,
       geographies: state.geographies, benchmarks: state.benchmarks, channels: state.channels,
       partners: state.partners, activePhase: state.activePhase,
-      exchangeRate: state.exchangeRate, extraRevisionRounds: state.extraRevisionRounds,
+      sourceCurrency: state.sourceCurrency, exchangeRate: state.exchangeRate, extraRevisionRounds: state.extraRevisionRounds,
       prodAssets: state.prodAssets, agencyPMOverride: state.agencyPMOverride,
       internalRoles: state.internalRoles, countries: state.countries
     }));
@@ -2597,11 +2655,11 @@ function exportCSV() {
     var locCalc = calcLocalisation(ct);
     var gt = ct + agSub + mgmtCalc.total + locCalc.total;
     csv += 'Production Cost Calculator\n';
-    csv += 'Exchange Rate (GBP to USD),' + state.exchangeRate + '\nExtra Revision Rounds,' + state.extraRevisionRounds + '\n\n';
-    csv += 'Creative Assets\nAsset Type,Description,Unit Cost (GBP),Unit Cost (USD),Qty,Subtotal (USD)\n';
+    csv += 'Source Currency,' + state.sourceCurrency + '\nExchange Rate (' + state.sourceCurrency + ' to USD),' + state.exchangeRate + '\nExtra Revision Rounds,' + state.extraRevisionRounds + '\n\n';
+    csv += 'Creative Assets\nAsset Type,Description,Unit Cost (USD),Qty,Subtotal (USD)\n';
     state.prodAssets.forEach(function(a) {
       var cu = a.isCustom ? a.costUSD : a.costGBP * state.exchangeRate;
-      csv += '"' + a.name + '","' + a.desc + '",' + (a.isCustom ? '' : a.costGBP) + ',' + cu.toFixed(2) + ',' + a.qty + ',' + (cu * a.qty).toFixed(2) + '\n';
+      csv += '"' + a.name + '","' + a.desc + '",' + cu.toFixed(2) + ',' + a.qty + ',' + (cu * a.qty).toFixed(2) + '\n';
     });
     csv += 'Total,,,,,' + ct.toFixed(2) + '\n\nAgency PM,' + pmVal.toFixed(2) + '\n';
     if (surch > 0) csv += 'Revision Surcharge,' + surch.toFixed(2) + '\n';
@@ -2676,6 +2734,7 @@ function init() {
   }
   if (!state.countries) state.countries = [];
   if (!state.exchangeRate) state.exchangeRate = 1.26;
+  if (!state.sourceCurrency) state.sourceCurrency = 'GBP';
   // Ensure targetStage always matches primaryKpi
   state.targetStage = state.primaryKpi;
   document.getElementById('totalBudget').value = fmtInputNum(state.totalBudget);
@@ -2685,7 +2744,6 @@ function init() {
   document.getElementById('targetValue').value = fmtInputNum(state.targetValue);
   document.getElementById('primaryKpiTarget').value = state.primaryKpi;
   // Production fields
-  document.getElementById('input-exchange-rate').value = state.exchangeRate;
   document.getElementById('input-revision-rounds').value = state.extraRevisionRounds || 0;
   setMode(state.mode);
   switchPhase(state.activePhase);
