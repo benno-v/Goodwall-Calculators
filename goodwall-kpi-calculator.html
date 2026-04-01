@@ -2647,33 +2647,56 @@ function hideResetConfirm() {
 function doReset() {
   hideResetConfirm();
   try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
-  // Re-initialise state in-place (works even when page reload or localStorage is blocked in iframes)
+  // Reset all state to zero / empty
   state.activePhase = 'kpiPlanning';
   state.mode = 'budgetToKpi';
-  state.totalBudget = 150000;
+  state.totalBudget = 0;
   state.primaryKpi = 'accelerated';
-  state.organicBoost = 1.48;
+  state.organicBoost = 0;
   state.targetStage = 'accelerated';
-  state.targetValue = 313528;
-  state.benchmarks = { reachToAccelerated: 1, acceleratedToEngaged: 50, engagedToTrained: 89, trainedToCredentialed: 13 };
+  state.targetValue = 0;
+  state.benchmarks = { reachToAccelerated: 0, acceleratedToEngaged: 0, engagedToTrained: 0, trainedToCredentialed: 0 };
   state.results = null;
   state.requiredBudget = null;
   state.sourceCurrency = 'GBP';
   state.exchangeRate = 1.26;
   state.extraRevisionRounds = 0;
   state.agencyPMOverride = null;
+  // Reset counters
   geoIdCounter = 0;
   channelIdCounter = 0;
   partnerIdCounter = 0;
   assetIdCounter = 0;
   countryIdCounter = 0;
-  initDefaults();
-  // Restore input fields
-  document.getElementById('totalBudget').value = fmtInputNum(state.totalBudget);
+  // Zero out geographies
+  state.geographies = GEO_PRESETS.map(function(g) {
+    return { id: ++geoIdCounter, name: g.name, allocation: 0, cpi: 0 };
+  });
+  // Zero out channels
+  state.channels = DEFAULT_CHANNELS.map(function(c) {
+    return { id: ++channelIdCounter, name: c.name, platform: c.platform, adType: c.adType, budgetPct: 0, cpi: 0, targetStage: c.targetStage };
+  });
+  // Zero out partners
+  state.partners = DEFAULT_PARTNERS.map(function(p) {
+    return { id: ++partnerIdCounter, name: p.name, budget: 0, geos: [], kpiPriority: p.kpiPriority };
+  });
+  // Zero out production assets
+  assetIdCounter = 0;
+  state.prodAssets = DEFAULT_PROD_ASSETS.map(function(d) {
+    return { id: ++assetIdCounter, name: d.name, desc: d.desc, costGBP: d.costGBP, costUSD: 0, qty: 0, category: d.category, noPM: d.noPM, isCustom: false };
+  });
+  state.internalRoles = [
+    { id: 1, label: 'Project Manager', rate: 0, pct: 0 },
+    { id: 2, label: 'Program Manager', rate: 0, pct: 0 },
+    { id: 3, label: 'Creative Lead', rate: 0, pct: 0 }
+  ];
+  state.countries = [];
+  // Restore input fields to zero
+  document.getElementById('totalBudget').value = '0';
   document.getElementById('primaryKpi').value = state.primaryKpi;
-  document.getElementById('organicBoost').value = state.organicBoost;
-  document.getElementById('organicBoostTarget').value = state.organicBoost;
-  document.getElementById('targetValue').value = fmtInputNum(state.targetValue);
+  document.getElementById('organicBoost').value = '0';
+  document.getElementById('organicBoostTarget').value = '0';
+  document.getElementById('targetValue').value = '0';
   document.getElementById('primaryKpiTarget').value = state.primaryKpi;
   document.getElementById('input-revision-rounds').value = 0;
   setMode(state.mode);
