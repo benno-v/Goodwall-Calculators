@@ -159,8 +159,37 @@ body {
 .phase-description {
   font-size: 14px;
   color: var(--gw-text-secondary);
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   max-width: 700px;
+}
+.phase-instructions {
+  background: var(--gw-bg-shade);
+  border: 1px solid var(--gw-border);
+  border-radius: var(--gw-radius-md);
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: var(--gw-text-secondary);
+  line-height: 1.6;
+}
+.phase-instructions summary {
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gw-text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+.phase-instructions ol {
+  margin: 10px 0 0 18px;
+  padding: 0;
+}
+.phase-instructions li {
+  margin-bottom: 4px;
+}
+.phase-instructions strong {
+  color: var(--gw-text);
 }
 
 .card {
@@ -600,6 +629,18 @@ select.input-field {
   <div id="phase-kpiPlanning" class="phase-content active">
     <p class="phase-description">Calculate the ideal KPIs for a program. Start from a budget to see achievable outcomes, or set a KPI target to determine the required budget.</p>
 
+    <details class="phase-instructions" open>
+      <summary>How to use this calculator</summary>
+      <ol>
+        <li>Choose a mode: <strong>Budget &rarr; KPIs</strong> to start from a budget, or <strong>KPI Target &rarr; Budget</strong> to start from a target outcome.</li>
+        <li>Enter your total marketing budget (or target KPI value) and select the <strong>Primary KPI Objective</strong> &mdash; the funnel stage your program cares most about. This determines which metric is highlighted throughout.</li>
+        <li>Set the <strong>Organic Boost Multiplier</strong> &mdash; this accounts for organic/viral growth on top of paid acquisition. A value of 1.48 means for every 100 paid users, you get 48 additional organic users (148 total). Set to 1.0 if no organic lift is expected.</li>
+        <li>Configure <strong>geographies</strong>: set each region's budget allocation %, <strong>CPI</strong> (cost per install &mdash; the average cost to acquire one Accelerated user in that market). Allocations should total 100%.</li>
+        <li>Adjust <strong>Conversion Benchmarks</strong> to match your expected funnel rates. <strong>Reach &rarr; Accelerated</strong> is the percentage of reached users who become Accelerated (e.g., 1% means 100 people see the ad for every 1 who installs). All rates are global across geographies.</li>
+        <li>Review the <strong>Projected KPI Funnel</strong> and <strong>Geographic Breakdown</strong> below. All values update when you click away from an edited field or press Enter.</li>
+      </ol>
+    </details>
+
     <div class="toggle-group">
       <div class="toggle-option active" data-mode="budgetToKpi" onclick="setMode('budgetToKpi')">Budget &rarr; KPIs</div>
       <div class="toggle-option" data-mode="kpiToBudget" onclick="setMode('kpiToBudget')">KPI Target &rarr; Budget</div>
@@ -612,7 +653,7 @@ select.input-field {
             <label class="input-label">Total Marketing Budget ($)</label>
             <div class="input-prefix">
               <span class="prefix">$</span>
-              <input type="text" id="totalBudget" class="input-field input-field-lg" value="150,000" oninput="onBudgetInput(this)">
+              <input type="text" id="totalBudget" class="input-field input-field-lg" value="150,000" onchange="onBudgetInput(this)">
             </div>
           </div>
         </div>
@@ -629,7 +670,7 @@ select.input-field {
           </div>
           <div class="input-group">
             <label class="input-label">Organic Boost Multiplier</label>
-            <input type="text" id="organicBoost" class="input-field" value="1.48" oninput="onOrganicBoostInput(this)">
+            <input type="text" id="organicBoost" class="input-field" value="1.48" onchange="onOrganicBoostInput(this)">
           </div>
         </div>
       </div>
@@ -650,13 +691,13 @@ select.input-field {
           </div>
           <div class="input-group">
             <label class="input-label">Target Value</label>
-            <input type="text" id="targetValue" class="input-field input-field-lg" value="313,528" oninput="onTargetValueInput(this)">
+            <input type="text" id="targetValue" class="input-field input-field-lg" value="313,528" onchange="onTargetValueInput(this)">
           </div>
         </div>
         <div>
           <div class="input-group">
             <label class="input-label">Organic Boost Multiplier</label>
-            <input type="text" id="organicBoostTarget" class="input-field" value="1.48" oninput="onOrganicBoostInput(this)">
+            <input type="text" id="organicBoostTarget" class="input-field" value="1.48" onchange="onOrganicBoostInput(this)">
           </div>
         </div>
       </div>
@@ -682,7 +723,6 @@ select.input-field {
               <th>% Alloc.</th>
               <th>Budget ($)</th>
               <th>CPI ($)</th>
-              <th>Reach Mult.</th>
               <th>Reach</th>
               <th>Accelerated</th>
               <th>Engaged</th>
@@ -777,6 +817,16 @@ select.input-field {
   <div id="phase-channelStrategy" class="phase-content">
     <p class="phase-description">Refine the marketing approach by defining channels and ad types. Allocate budget across channels and see projected contributions to the KPI funnel.</p>
 
+    <details class="phase-instructions" open>
+      <summary>How to use this calculator</summary>
+      <ol>
+        <li>Review the <strong>budget carried over</strong> from KPI Planning in the summary cards above the table.</li>
+        <li>Add or edit marketing channels &mdash; set the <strong>platform</strong> (e.g., Meta, Google), <strong>ad type</strong> (e.g., Video Ad, Sponsored Content), <strong>budget %</strong>, <strong>CPI</strong> (cost per user acquired through this channel), and whether the channel targets <strong>Reach</strong> or <strong>Engaged</strong> users.</li>
+        <li>Ensure channel budget allocations <strong>total 100%</strong>. A warning appears if they don't.</li>
+        <li>Review the <strong>Channel Contribution to Funnel</strong> to see how each channel feeds into the overall KPI funnel, cascading through downstream stages using conversion benchmarks.</li>
+      </ol>
+    </details>
+
     <div id="channel-summary" class="summary-grid mb-20"></div>
 
     <div class="card">
@@ -829,6 +879,17 @@ select.input-field {
   <!-- PARTNER POOL -->
   <div id="phase-partnerPool" class="phase-content">
     <p class="phase-description">Pool marketing budgets across multiple partners. Allocate each partner's budget by geography and KPI priority, then view the combined marketing pool.</p>
+
+    <details class="phase-instructions" open>
+      <summary>How to use this calculator</summary>
+      <ol>
+        <li>Add <strong>partners</strong> with their individual marketing budgets.</li>
+        <li>Select each partner's <strong>geographic focus areas</strong> (multi-select) &mdash; budget is split equally across selected geographies.</li>
+        <li>Set each partner's <strong>KPI priority</strong> &mdash; the funnel stage they care most about.</li>
+        <li>Review the <strong>Budget Pool by Geography</strong> table to see how budgets aggregate across partners per region.</li>
+        <li>Review <strong>Combined KPI Projections</strong> for the pooled funnel outcomes and cost-per-user at each stage.</li>
+      </ol>
+    </details>
 
     <div id="pool-summary" class="summary-grid mb-20"></div>
 
@@ -897,6 +958,29 @@ select.input-field {
     </div>
   </div>
 
+  <!-- RESOURCES -->
+  <div class="card" style="margin-top:40px;border-left:3px solid var(--gw-green)">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Suggested Resources for CPI, CTR &amp; Regional Benchmarks</div>
+        <div class="card-subtitle">Use these sources to inform your benchmark assumptions. Data varies by industry, platform, and time period.</div>
+      </div>
+    </div>
+    <ul style="font-size:13px;color:var(--gw-text-secondary);line-height:1.8;margin:0 0 0 18px;padding:0">
+      <li><strong>Meta Ads Library &amp; Business Help Center</strong> &mdash; CPM, CPI, and CTR benchmarks by region</li>
+      <li><strong>Google Ads Benchmarks</strong> (WordStream / Search Engine Journal) &mdash; CPC, CTR, conversion rates by industry</li>
+      <li><strong>TikTok for Business</strong> &mdash; Regional ad performance benchmarks</li>
+      <li><strong>Statista</strong> &mdash; Global and regional digital advertising benchmarks</li>
+      <li><strong>AppsFlyer Performance Index</strong> &mdash; CPI benchmarks by country, platform, and app category</li>
+      <li><strong>Adjust Global App Trends</strong> &mdash; Install and engagement benchmarks by market</li>
+      <li><strong>SocialBakers (Emplifi)</strong> &mdash; Social media engagement benchmarks by platform and region</li>
+      <li><strong>LinkedIn Marketing Solutions Blog</strong> &mdash; B2B advertising performance benchmarks</li>
+    </ul>
+    <div style="margin-top:14px;padding:10px 14px;background:var(--gw-orange-light);border-radius:var(--gw-radius-sm);font-size:12px;color:var(--gw-text-secondary);line-height:1.5">
+      <strong style="color:var(--gw-orange)"><i class="ph ph-warning"></i> Important:</strong> All benchmark data must be validated by the Programs &amp; Marketing teams before use in planning. Published benchmarks are industry averages and may not reflect your specific program performance.
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -913,21 +997,22 @@ var STAGE_MAP = {};
 STAGES.forEach(function(s) { STAGE_MAP[s.key] = s; });
 
 var GEO_PRESETS = [
-  { name: 'Global', allocation: 15, cpi: 0.50, reachMultiplier: 100 },
-  { name: 'US', allocation: 20, cpi: 3.00, reachMultiplier: 80 },
-  { name: 'Brazil', allocation: 10, cpi: 0.60, reachMultiplier: 100 },
-  { name: 'Nigeria', allocation: 20, cpi: 0.40, reachMultiplier: 120 },
-  { name: 'Philippines', allocation: 5, cpi: 0.30, reachMultiplier: 150 },
-  { name: 'India', allocation: 10, cpi: 0.24, reachMultiplier: 120 },
-  { name: 'UK', allocation: 5, cpi: 3.00, reachMultiplier: 80 },
-  { name: 'Indonesia', allocation: 5, cpi: 0.10, reachMultiplier: 150 },
-  { name: 'Kenya', allocation: 5, cpi: 0.30, reachMultiplier: 120 },
-  { name: 'South Africa', allocation: 5, cpi: 0.60, reachMultiplier: 100 }
+  { name: 'Global', allocation: 15, cpi: 0.50 },
+  { name: 'US', allocation: 20, cpi: 3.00 },
+  { name: 'Brazil', allocation: 10, cpi: 0.60 },
+  { name: 'Nigeria', allocation: 20, cpi: 0.40 },
+  { name: 'Philippines', allocation: 5, cpi: 0.30 },
+  { name: 'India', allocation: 10, cpi: 0.24 },
+  { name: 'UK', allocation: 5, cpi: 3.00 },
+  { name: 'Indonesia', allocation: 5, cpi: 0.10 },
+  { name: 'Kenya', allocation: 5, cpi: 0.30 },
+  { name: 'South Africa', allocation: 5, cpi: 0.60 }
 ];
 
-var DEFAULT_BENCHMARKS = { acceleratedToEngaged: 50, engagedToTrained: 89, trainedToCredentialed: 13 };
+var DEFAULT_BENCHMARKS = { reachToAccelerated: 1, acceleratedToEngaged: 50, engagedToTrained: 89, trainedToCredentialed: 13 };
 
 var BENCHMARK_DEFS = [
+  { key: 'reachToAccelerated', label: 'Reach \u2192 Accelerated', desc: 'Percentage of reached users who install or actively engage (CTR \u00d7 install rate). E.g., 1% means 100 people see the ad for every 1 who installs.' },
   { key: 'acceleratedToEngaged', label: 'Accelerated \u2192 Engaged', desc: 'Percentage of accelerated users who engage on the platform' },
   { key: 'engagedToTrained', label: 'Engaged \u2192 Trained', desc: 'Percentage of engaged users who complete training content' },
   { key: 'trainedToCredentialed', label: 'Trained \u2192 Credentialed', desc: 'Percentage of trained users who earn a credential' }
@@ -967,7 +1052,7 @@ var state = {
   targetStage: 'credentialed',
   targetValue: 313528,
   geographies: [],
-  benchmarks: { acceleratedToEngaged: 50, engagedToTrained: 89, trainedToCredentialed: 13 },
+  benchmarks: { reachToAccelerated: 1, acceleratedToEngaged: 50, engagedToTrained: 89, trainedToCredentialed: 13 },
   channels: [],
   partners: [],
   results: null,
@@ -1028,6 +1113,7 @@ function calculateBudgetToKpis() {
   var geographies = state.geographies;
   var benchmarks = state.benchmarks;
   var organicBoost = state.organicBoost;
+  var rToA = benchmarks.reachToAccelerated / 100;
   var aToE = benchmarks.acceleratedToEngaged / 100;
   var eToT = benchmarks.engagedToTrained / 100;
   var tToC = benchmarks.trainedToCredentialed / 100;
@@ -1035,7 +1121,7 @@ function calculateBudgetToKpis() {
   var geoResults = geographies.map(function(geo) {
     var budget = totalBudget * (geo.allocation / 100);
     var accelerated = geo.cpi > 0 ? (budget / geo.cpi) * organicBoost : 0;
-    var reach = accelerated * geo.reachMultiplier;
+    var reach = rToA > 0 ? accelerated / rToA : 0;
     var engaged = accelerated * aToE;
     var trained = engaged * eToT;
     var credentialed = trained * tToC;
@@ -1070,31 +1156,22 @@ function calculateKpiToBudget() {
   var geographies = state.geographies;
   var benchmarks = state.benchmarks;
   var organicBoost = state.organicBoost;
+  var rToA = benchmarks.reachToAccelerated / 100;
   var aToE = benchmarks.acceleratedToEngaged / 100;
   var eToT = benchmarks.engagedToTrained / 100;
   var tToC = benchmarks.trainedToCredentialed / 100;
 
-  var totalAlloc = 0;
-  geographies.forEach(function(g) { totalAlloc += g.allocation; });
-  if (totalAlloc === 0) totalAlloc = 1;
-
-  // Compute per-dollar yields for each funnel stage
-  // For each geo: accel_i = (budget * alloc_i/100 / cpi_i) * organicBoost
-  // reach_i = accel_i * reachMultiplier_i
-  // So: reachPerDollar = organicBoost * sum(alloc_i/100 * RM_i / cpi_i)
-  //     accelPerDollar = organicBoost * sum(alloc_i/100 / cpi_i)
+  // Compute accelPerDollar: how many accelerated users per $1 of total budget
   var accelPerDollar = 0;
-  var reachPerDollar = 0;
   geographies.forEach(function(g) {
     if (g.cpi > 0) {
       accelPerDollar += (g.allocation / 100) / g.cpi;
-      reachPerDollar += (g.allocation / 100) * g.reachMultiplier / g.cpi;
     }
   });
   accelPerDollar *= organicBoost;
-  reachPerDollar *= organicBoost;
   if (accelPerDollar === 0) accelPerDollar = organicBoost / 0.50; // fallback
-  if (reachPerDollar === 0) reachPerDollar = accelPerDollar * 100;
+  // reachPerDollar = accelPerDollar / rToA (since reach = accelerated / rToA)
+  var reachPerDollar = rToA > 0 ? accelPerDollar / rToA : accelPerDollar * 100;
 
   var requiredBudget = 0;
   switch (targetStage) {
@@ -1163,6 +1240,7 @@ function renderKpiPlanning() {
 function renderGeoTable(effectiveBudget) {
   var geographies = state.geographies;
   var benchmarks = state.benchmarks;
+  var rToA = benchmarks.reachToAccelerated / 100;
   var aToE = benchmarks.acceleratedToEngaged / 100;
   var eToT = benchmarks.engagedToTrained / 100;
   var tToC = benchmarks.trainedToCredentialed / 100;
@@ -1173,7 +1251,7 @@ function renderGeoTable(effectiveBudget) {
   geographies.forEach(function(geo) {
     var budget = effectiveBudget * (geo.allocation / 100);
     var accel = geo.cpi > 0 ? (budget / geo.cpi) * state.organicBoost : 0;
-    var reach = accel * geo.reachMultiplier;
+    var reach = rToA > 0 ? accel / rToA : 0;
     var engaged = accel * aToE;
     var trained = engaged * eToT;
     var cred = trained * tToC;
@@ -1181,11 +1259,10 @@ function renderGeoTable(effectiveBudget) {
     totalAccel += accel; totalEngaged += engaged; totalTrained += trained; totalCred += cred;
 
     rows += '<tr data-geo-id="' + geo.id + '">'
-      + '<td><input class="input-inline" style="width:110px;text-align:left" value="' + escapeHtml(geo.name) + '" data-field="name" oninput="updateGeo(' + geo.id + ',\'name\',this.value)"></td>'
-      + '<td><input class="input-inline" style="width:60px" value="' + geo.allocation + '" data-field="allocation" oninput="updateGeo(' + geo.id + ',\'allocation\',this.value)">%</td>'
+      + '<td><input class="input-inline" style="width:110px;text-align:left" value="' + escapeHtml(geo.name) + '" data-field="name" onchange="updateGeo(' + geo.id + ',\'name\',this.value)"></td>'
+      + '<td><input class="input-inline" style="width:60px" value="' + geo.allocation + '" data-field="allocation" onchange="updateGeo(' + geo.id + ',\'allocation\',this.value)">%</td>'
       + '<td>' + fmtCurrency(budget) + '</td>'
-      + '<td><input class="input-inline" style="width:60px" value="' + geo.cpi + '" data-field="cpi" oninput="updateGeo(' + geo.id + ',\'cpi\',this.value)"></td>'
-      + '<td><input class="input-inline" style="width:60px" value="' + geo.reachMultiplier + '" data-field="reachMultiplier" oninput="updateGeo(' + geo.id + ',\'reachMultiplier\',this.value)"></td>'
+      + '<td><input class="input-inline" style="width:60px" value="' + geo.cpi + '" data-field="cpi" onchange="updateGeo(' + geo.id + ',\'cpi\',this.value)"></td>'
       + '<td>' + fmtNum(reach) + '</td>'
       + '<td>' + fmtNum(accel) + '</td>'
       + '<td>' + fmtNum(engaged) + '</td>'
@@ -1195,7 +1272,7 @@ function renderGeoTable(effectiveBudget) {
       + '</tr>';
   });
 
-  rows += '<tr class="total-row"><td><strong>Total</strong></td><td><strong>' + fmtPct(totalAlloc) + '</strong></td><td><strong>' + fmtCurrency(totalBudget) + '</strong></td><td></td><td></td><td><strong>' + fmtNum(totalReach) + '</strong></td><td><strong>' + fmtNum(totalAccel) + '</strong></td><td><strong>' + fmtNum(totalEngaged) + '</strong></td><td><strong>' + fmtNum(totalTrained) + '</strong></td><td><strong>' + fmtNum(totalCred) + '</strong></td><td></td></tr>';
+  rows += '<tr class="total-row"><td><strong>Total</strong></td><td><strong>' + fmtPct(totalAlloc) + '</strong></td><td><strong>' + fmtCurrency(totalBudget) + '</strong></td><td></td><td><strong>' + fmtNum(totalReach) + '</strong></td><td><strong>' + fmtNum(totalAccel) + '</strong></td><td><strong>' + fmtNum(totalEngaged) + '</strong></td><td><strong>' + fmtNum(totalTrained) + '</strong></td><td><strong>' + fmtNum(totalCred) + '</strong></td><td></td></tr>';
   setContent('geo-table-body', rows);
 
   var colors = ['#15C970', '#5796F4', '#FF8626', '#F4DD2A', '#0D2E24', '#15C970', '#5796F4', '#FF8626', '#F4DD2A', '#0D2E24'];
@@ -1215,7 +1292,7 @@ function renderGeoTable(effectiveBudget) {
 function renderBenchmarkTable() {
   var rows = '';
   BENCHMARK_DEFS.forEach(function(b) {
-    rows += '<tr><td><strong>' + escapeHtml(b.label) + '</strong></td><td><input class="input-inline" style="width:70px" value="' + state.benchmarks[b.key] + '" oninput="updateBenchmark(\'' + b.key + '\',this.value)">%</td><td class="text-muted" style="font-size:12px">' + escapeHtml(b.desc) + '</td></tr>';
+    rows += '<tr><td><strong>' + escapeHtml(b.label) + '</strong></td><td><input class="input-inline" style="width:70px" value="' + state.benchmarks[b.key] + '" onchange="updateBenchmark(\'' + b.key + '\',this.value)">%</td><td class="text-muted" style="font-size:12px">' + escapeHtml(b.desc) + '</td></tr>';
   });
   setContent('benchmark-table-body', rows);
 }
@@ -1296,12 +1373,12 @@ function renderChannelStrategy() {
       stageOptions += '<option value="' + s.key + '"' + (s.key === ch.targetStage ? ' selected' : '') + '>' + escapeHtml(s.label) + '</option>';
     });
     rows += '<tr>'
-      + '<td><input class="input-inline" style="width:130px;text-align:left" value="' + escapeHtml(ch.name) + '" oninput="updateChannel(' + ch.id + ',\'name\',this.value)"></td>'
-      + '<td><input class="input-inline" style="width:90px;text-align:left" value="' + escapeHtml(ch.platform) + '" oninput="updateChannel(' + ch.id + ',\'platform\',this.value)"></td>'
-      + '<td><input class="input-inline" style="width:140px;text-align:left" value="' + escapeHtml(ch.adType) + '" oninput="updateChannel(' + ch.id + ',\'adType\',this.value)"></td>'
-      + '<td><input class="input-inline" style="width:55px" value="' + ch.budgetPct + '" oninput="updateChannel(' + ch.id + ',\'budgetPct\',this.value)">%</td>'
+      + '<td><input class="input-inline" style="width:130px;text-align:left" value="' + escapeHtml(ch.name) + '" onchange="updateChannel(' + ch.id + ',\'name\',this.value)"></td>'
+      + '<td><input class="input-inline" style="width:90px;text-align:left" value="' + escapeHtml(ch.platform) + '" onchange="updateChannel(' + ch.id + ',\'platform\',this.value)"></td>'
+      + '<td><input class="input-inline" style="width:140px;text-align:left" value="' + escapeHtml(ch.adType) + '" onchange="updateChannel(' + ch.id + ',\'adType\',this.value)"></td>'
+      + '<td><input class="input-inline" style="width:55px" value="' + ch.budgetPct + '" onchange="updateChannel(' + ch.id + ',\'budgetPct\',this.value)">%</td>'
       + '<td>' + fmtCurrency(cb) + '</td>'
-      + '<td><input class="input-inline" style="width:60px" value="' + ch.cpi + '" oninput="updateChannel(' + ch.id + ',\'cpi\',this.value)"></td>'
+      + '<td><input class="input-inline" style="width:60px" value="' + ch.cpi + '" onchange="updateChannel(' + ch.id + ',\'cpi\',this.value)"></td>'
       + '<td><select class="input-inline" style="width:110px;text-align:left" onchange="updateChannel(' + ch.id + ',\'targetStage\',this.value)">' + stageOptions + '</select></td>'
       + '<td>' + fmtNum(users) + '</td>'
       + '<td><button class="btn-icon" onclick="removeChannel(' + ch.id + ')" title="Remove"><i class="ph ph-x"></i></button></td>'
@@ -1328,19 +1405,13 @@ function renderChannelStrategy() {
 
 function renderChannelFunnel(effectiveBudget) {
   var benchmarks = state.benchmarks;
+  var rToA = benchmarks.reachToAccelerated / 100;
   var aToE = benchmarks.acceleratedToEngaged / 100;
   var eToT = benchmarks.engagedToTrained / 100;
   var tToC = benchmarks.trainedToCredentialed / 100;
 
   var stageContributions = {};
   STAGES.forEach(function(s) { stageContributions[s.key] = 0; });
-
-  var totalAllocGeo = 0;
-  state.geographies.forEach(function(g) { totalAllocGeo += g.allocation; });
-  if (totalAllocGeo === 0) totalAllocGeo = 1;
-  var avgRM = 0;
-  state.geographies.forEach(function(g) { avgRM += g.reachMultiplier * (g.allocation / totalAllocGeo); });
-  if (avgRM === 0) avgRM = 100;
 
   state.channels.forEach(function(ch) {
     var cb = effectiveBudget * (ch.budgetPct / 100);
@@ -1350,16 +1421,16 @@ function renderChannelFunnel(effectiveBudget) {
 
     var stageOrder = STAGES.map(function(s) { return s.key; });
     var idx = stageOrder.indexOf(ts);
-    var rates = [1, 1, aToE, eToT, tToC];
+    // Downstream rates: reach→accel uses rToA, accel→engaged uses aToE, etc.
+    var rates = [1, rToA, aToE, eToT, tToC];
     var current = users;
     for (var i = idx + 1; i < stageOrder.length; i++) {
       current *= rates[i];
       stageContributions[stageOrder[i]] += current;
     }
-    if (idx === 1) {
-      stageContributions.reach += users * avgRM;
-    } else if (idx === 0) {
-      // nothing upstream
+    // Upstream: if targeting accelerated, derive reach
+    if (idx === 1 && rToA > 0) {
+      stageContributions.reach += users / rToA;
     }
   });
 
@@ -1394,8 +1465,8 @@ function renderPartnerPool() {
     });
 
     rows += '<tr>'
-      + '<td><input class="input-inline" style="width:120px;text-align:left" value="' + escapeHtml(p.name) + '" oninput="updatePartner(' + p.id + ',\'name\',this.value)"></td>'
-      + '<td><input class="input-inline" style="width:90px" value="' + p.budget + '" oninput="updatePartner(' + p.id + ',\'budget\',this.value)"></td>'
+      + '<td><input class="input-inline" style="width:120px;text-align:left" value="' + escapeHtml(p.name) + '" onchange="updatePartner(' + p.id + ',\'name\',this.value)"></td>'
+      + '<td><input class="input-inline" style="width:90px" value="' + p.budget + '" onchange="updatePartner(' + p.id + ',\'budget\',this.value)"></td>'
       + '<td>' + geoChips + '<div class="multi-select" style="display:inline-block;vertical-align:middle;margin-left:4px"><button class="btn btn-sm btn-secondary" style="padding:2px 6px;font-size:11px" onclick="toggleGeoDropdown(' + p.id + ',event)"><i class="ph ph-plus"></i></button><div class="multi-select-dropdown" id="geo-dd-' + p.id + '">' + geoOptions + '</div></div></td>'
       + '<td><select class="input-inline" style="width:110px;text-align:left" onchange="updatePartner(' + p.id + ',\'kpiPriority\',this.value)">' + stageOptions + '</select></td>'
       + '<td><button class="btn-icon" onclick="removePartner(' + p.id + ')" title="Remove"><i class="ph ph-x"></i></button></td>'
@@ -1483,9 +1554,10 @@ function renderPoolFunnel() {
 
   Object.keys(geoPool).forEach(function(geoName) {
     var budget = geoPool[geoName];
-    var geo = geoLookup[geoName] || { cpi: 0.50, reachMultiplier: 100 };
+    var geo = geoLookup[geoName] || { cpi: 0.50 };
+    var rToA = benchmarks.reachToAccelerated / 100;
     var accel = geo.cpi > 0 ? (budget / geo.cpi) * organicBoost : 0;
-    var reach = accel * (geo.reachMultiplier || 100);
+    var reach = rToA > 0 ? accel / rToA : 0;
     var engaged = accel * aToE;
     var trained = engaged * eToT;
     var cred = trained * tToC;
@@ -1566,7 +1638,7 @@ function updateGeo(id, field, value) {
 }
 
 function addGeography() {
-  state.geographies.push({ id: ++geoIdCounter, name: 'New Region', allocation: 0, cpi: 0.50, reachMultiplier: 100 });
+  state.geographies.push({ id: ++geoIdCounter, name: 'New Region', allocation: 0, cpi: 0.50 });
   render();
   saveState();
 }
@@ -1709,8 +1781,8 @@ function loadState() {
 
 function resetState() {
   if (!confirm('Reset all data to defaults?')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  location.reload();
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  window.location.href = window.location.href.split('#')[0];
 }
 
 // CSV Export
