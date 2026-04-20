@@ -2606,19 +2606,34 @@ function loadState() {
       Object.keys(saved).forEach(function(k) { state[k] = saved[k]; });
       // Heal saved state that was broken by an earlier zero-reset.
       // If all benchmarks are 0 AND organicBoost is 0, restore calculation defaults
-      // so the funnel math works. Project-specific inputs (budget, allocations, etc.)
-      // are left as saved.
+      // so the funnel math works. Project-specific inputs (budget) are left as saved.
       var b = state.benchmarks || {};
       var allBenchZero = !b.reachToAccelerated && !b.acceleratedToEngaged && !b.engagedToTrained && !b.trainedToCredentialed;
       if (allBenchZero && !state.organicBoost) {
         state.benchmarks = Object.assign({}, DEFAULT_BENCHMARKS);
         state.organicBoost = 1.48;
-        // Also restore geography CPIs if all are zero
-        var allCpiZero = state.geographies && state.geographies.every(function(g) { return !g.cpi; });
-        if (allCpiZero) {
+      }
+      // Restore geography CPIs and allocations from presets if all are zero
+      if (state.geographies) {
+        var allCpiZero = state.geographies.every(function(g) { return !g.cpi; });
+        var allAllocZero = state.geographies.every(function(g) { return !g.allocation; });
+        if (allCpiZero || allAllocZero) {
           state.geographies.forEach(function(g) {
             var preset = GEO_PRESETS.filter(function(p) { return p.name === g.name; })[0];
-            if (preset) g.cpi = preset.cpi;
+            if (preset) {
+              if (allCpiZero) g.cpi = preset.cpi;
+              if (allAllocZero) g.allocation = preset.allocation;
+            }
+          });
+        }
+      }
+      // Restore channel budgetPct and CPI from presets if all are zero
+      if (state.channels) {
+        var chAllZero = state.channels.every(function(c) { return !c.budgetPct && !c.cpi; });
+        if (chAllZero) {
+          state.channels.forEach(function(c) {
+            var preset = DEFAULT_CHANNELS.filter(function(p) { return p.name === c.name; })[0];
+            if (preset) { c.budgetPct = preset.budgetPct; c.cpi = preset.cpi; }
           });
         }
       }
@@ -2706,13 +2721,13 @@ function doReset() {
   // Preserve industry benchmarks (calculation constants) — users can still edit them
   state.benchmarks = Object.assign({}, DEFAULT_BENCHMARKS);
   state.organicBoost = 1.48;
-  // Geographies: zero out allocation (project-specific), preserve CPI preset (benchmark)
+  // Geographies: preserve preset allocation and CPI (template defaults so funnel works)
   state.geographies = GEO_PRESETS.map(function(g) {
-    return { id: ++geoIdCounter, name: g.name, allocation: 0, cpi: g.cpi };
+    return { id: ++geoIdCounter, name: g.name, allocation: g.allocation, cpi: g.cpi };
   });
-  // Channels: zero out budgetPct, preserve CPI preset
+  // Channels: preserve preset budgetPct and CPI (template defaults)
   state.channels = DEFAULT_CHANNELS.map(function(c) {
-    return { id: ++channelIdCounter, name: c.name, platform: c.platform, adType: c.adType, budgetPct: 0, cpi: c.cpi, targetStage: c.targetStage };
+    return { id: ++channelIdCounter, name: c.name, platform: c.platform, adType: c.adType, budgetPct: c.budgetPct, cpi: c.cpi, targetStage: c.targetStage };
   });
   // Zero out partners
   state.partners = DEFAULT_PARTNERS.map(function(p) {
