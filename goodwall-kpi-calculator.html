@@ -2604,6 +2604,24 @@ function loadState() {
     var saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (saved) {
       Object.keys(saved).forEach(function(k) { state[k] = saved[k]; });
+      // Heal saved state that was broken by an earlier zero-reset.
+      // If all benchmarks are 0 AND organicBoost is 0, restore calculation defaults
+      // so the funnel math works. Project-specific inputs (budget, allocations, etc.)
+      // are left as saved.
+      var b = state.benchmarks || {};
+      var allBenchZero = !b.reachToAccelerated && !b.acceleratedToEngaged && !b.engagedToTrained && !b.trainedToCredentialed;
+      if (allBenchZero && !state.organicBoost) {
+        state.benchmarks = Object.assign({}, DEFAULT_BENCHMARKS);
+        state.organicBoost = 1.48;
+        // Also restore geography CPIs if all are zero
+        var allCpiZero = state.geographies && state.geographies.every(function(g) { return !g.cpi; });
+        if (allCpiZero) {
+          state.geographies.forEach(function(g) {
+            var preset = GEO_PRESETS.filter(function(p) { return p.name === g.name; })[0];
+            if (preset) g.cpi = preset.cpi;
+          });
+        }
+      }
       var maxGeo = 0, maxCh = 0, maxP = 0;
       state.geographies.forEach(function(g) { if (g.id > maxGeo) maxGeo = g.id; });
       state.channels.forEach(function(c) { if (c.id > maxCh) maxCh = c.id; });
@@ -2685,19 +2703,22 @@ function doReset() {
   partnerIdCounter = 0;
   assetIdCounter = 0;
   countryIdCounter = 0;
-  // Zero out geographies
+  // Preserve industry benchmarks (calculation constants) — users can still edit them
+  state.benchmarks = Object.assign({}, DEFAULT_BENCHMARKS);
+  state.organicBoost = 1.48;
+  // Geographies: zero out allocation (project-specific), preserve CPI preset (benchmark)
   state.geographies = GEO_PRESETS.map(function(g) {
-    return { id: ++geoIdCounter, name: g.name, allocation: 0, cpi: 0 };
+    return { id: ++geoIdCounter, name: g.name, allocation: 0, cpi: g.cpi };
   });
-  // Zero out channels
+  // Channels: zero out budgetPct, preserve CPI preset
   state.channels = DEFAULT_CHANNELS.map(function(c) {
-    return { id: ++channelIdCounter, name: c.name, platform: c.platform, adType: c.adType, budgetPct: 0, cpi: 0, targetStage: c.targetStage };
+    return { id: ++channelIdCounter, name: c.name, platform: c.platform, adType: c.adType, budgetPct: 0, cpi: c.cpi, targetStage: c.targetStage };
   });
   // Zero out partners
   state.partners = DEFAULT_PARTNERS.map(function(p) {
     return { id: ++partnerIdCounter, name: p.name, budget: 0, geos: [], kpiPriority: p.kpiPriority };
   });
-  // Zero out production assets
+  // Reset production assets to defaults with zero quantities
   assetIdCounter = 0;
   state.prodAssets = DEFAULT_PROD_ASSETS.map(function(d) {
     return { id: ++assetIdCounter, name: d.name, desc: d.desc, costGBP: d.costGBP, costUSD: 0, qty: 0, category: d.category, noPM: d.noPM, isCustom: false };
@@ -2708,11 +2729,11 @@ function doReset() {
     { id: 3, label: 'Creative Lead', rate: 0, pct: 0 }
   ];
   state.countries = [];
-  // Restore input fields to zero
+  // Restore input fields
   document.getElementById('totalBudget').value = '0';
   document.getElementById('primaryKpi').value = state.primaryKpi;
-  document.getElementById('organicBoost').value = '0';
-  document.getElementById('organicBoostTarget').value = '0';
+  document.getElementById('organicBoost').value = state.organicBoost;
+  document.getElementById('organicBoostTarget').value = state.organicBoost;
   document.getElementById('targetValue').value = '0';
   document.getElementById('primaryKpiTarget').value = state.primaryKpi;
   document.getElementById('input-revision-rounds').value = 0;
